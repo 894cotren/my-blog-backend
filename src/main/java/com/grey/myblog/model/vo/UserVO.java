@@ -1,0 +1,68 @@
+package com.grey.myblog.model.vo;
+
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Date;
+
+/**
+ * 脱敏用户数据，初始创建为了给分页使用
+ *
+ * @TableName user
+ */
+@Data
+public class UserVO implements Serializable {
+    /**
+     * 主键ID
+     */
+    private Long id;
+
+    /**
+     * 用户账号
+     */
+    private String account;
+
+    /**
+     * 用户昵称
+     */
+    private String nickname;
+
+    /**
+     * 用户邮箱
+     */
+    private String email;
+
+
+    /**
+     * 用户性别(0女1男)
+     */
+    private Integer gender;
+
+    /**
+     * 用户头像
+     */
+    private String avatar;
+
+    /**
+     * 用户简介
+     */
+    private String profile;
+
+    /**
+     * 用户角色：user/admin
+     */
+    private String role;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
+
+
+    private static final long serialVersionUID = 1L;
+}

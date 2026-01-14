@@ -1,6 +1,6 @@
 package com.grey.myblog.common;
 
-import com.grey.myblog.exception.ErrorCode;
+import com.grey.myblog.model.enums.ErrorCode;
 import lombok.Data;
 
 /**

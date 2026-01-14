@@ -1,0 +1,41 @@
+package com.grey.myblog.model.request;
+
+import lombok.Data;
+
+import java.io.Serializable;
+/**
+ * 用户添加request
+ *
+ * @author grey
+ */
+@Data
+public class UserAddRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 用户昵称
+     */
+    private String name;
+
+    /**
+     * 账号
+     */
+    private String account;
+
+    /**
+     * 密码
+     */
+    private String password;
+
+    /**
+     * 用户简介
+     */
+    private String profile;
+
+    /**
+     * 用户角色：user/admin 其他权益待定
+     */
+    private String role;
+
+
+}

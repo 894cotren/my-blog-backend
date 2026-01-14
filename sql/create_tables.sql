@@ -1,18 +1,23 @@
 -- 用户表
 CREATE TABLE IF NOT EXISTS `user` (
     `id`            bigint          NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `user_account`  varchar(256)    NOT NULL                COMMENT '用户账号',
-    `user_password` varchar(512)    NOT NULL                COMMENT '用户密码',
-    `user_name`     varchar(256)    DEFAULT NULL            COMMENT '用户昵称',
-    `user_avatar`   varchar(1024)   DEFAULT NULL            COMMENT '用户头像',
-    `user_profile`  varchar(512)    DEFAULT NULL            COMMENT '用户简介',
-    `user_role`     varchar(256)    NOT NULL DEFAULT 'user' COMMENT '用户角色：user/admin',
+    `account`       varchar(256)    NOT NULL                COMMENT '用户账号',
+    `password`      varchar(512)    NOT NULL                COMMENT '用户密码',
+    `nickname`      varchar(256)    DEFAULT NULL            COMMENT '用户昵称',
+    `email`         varchar(256)    DEFAULT NULL            COMMENT '用户邮箱',
+    `mobile`        varchar(20)     DEFAULT NULL            COMMENT '用户手机号码',
+    `gender`        tinyint(1)      DEFAULT NULL            COMMENT '用户性别(0女1男)',
+    `avatar`        varchar(1024)   DEFAULT NULL            COMMENT '用户头像',
+    `profile`       varchar(512)    DEFAULT NULL            COMMENT '用户简介',
+    `role`          varchar(256)    NOT NULL DEFAULT 'user' COMMENT '用户角色：user/admin',
     `create_time`   datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`   datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `is_delete`     tinyint         NOT NULL DEFAULT '0'    COMMENT '是否删除（0-未删除，1-已删除）',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_user_account` (`user_account`),
-    KEY `idx_user_name` (`user_name`)
+    UNIQUE KEY `uk_account` (`account`),
+    UNIQUE KEY `uk_email` (`email`),
+    UNIQUE KEY `uk_mobile` (`mobile`),
+    KEY `idx_user_name` (`nickname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
 -- 文章表

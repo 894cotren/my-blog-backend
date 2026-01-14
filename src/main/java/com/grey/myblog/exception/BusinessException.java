@@ -1,5 +1,6 @@
 package com.grey.myblog.exception;
 
+import com.grey.myblog.model.enums.ErrorCode;
 import lombok.Getter;
 
 /**

@@ -1,6 +1,7 @@
 package com.grey.myblog.exception;
 
 import com.grey.myblog.common.Result;
+import com.grey.myblog.model.enums.ErrorCode;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;

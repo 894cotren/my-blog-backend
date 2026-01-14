@@ -1,9 +1,11 @@
 package com.grey.myblog.exception;
 
+import com.grey.myblog.model.enums.ErrorCode;
+
 /**
  *  抛异常工具，快速判断并抛出异常
  */
-public class ThrowUtils {
+public class ThrowUtil {
 
     /**
      * 条件成立则抛出异常,传入需要抛的异常

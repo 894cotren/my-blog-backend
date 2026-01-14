@@ -1,4 +1,4 @@
-package com.grey.myblog.exception;
+package com.grey.myblog.model.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
