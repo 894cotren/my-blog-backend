@@ -18,6 +18,7 @@ import com.grey.myblog.model.vo.LoginUserVO;
 import com.grey.myblog.model.vo.UserVO;
 import com.grey.myblog.service.UserService;
 import com.grey.myblog.mapper.UserMapper;
+import com.grey.myblog.utils.ValidationUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.BeanUtils;
@@ -149,31 +150,45 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public User getLoginUser(HttpServletRequest request) {
         /**
-         * 1. 从请求体里获取到对象
-         * 2. 判断是否空
-         *    1. 为空抛出异常
-         * 3. 查询用户信息，拿到最新的用户对象  ，防止缓存跟数据不一致。
-         * 4. 判断是否为空
-         *    1. 为空抛出异常  （可能被管理员封禁了）
-         * 5. 返回用户对象
+         * 1. 从 session 获取登录用户对象
+         * 2. 检查是否为 null
+         * 3. 检查类型是否正确（防止类型转换异常）
+         * 4. 安全地进行类型转换
+         * 5. 检查关键字段（id）是否完整
+         * 6. 查询最新用户信息，防止缓存与数据库不一致
+         * 7. 返回用户对象
          */
-        //从请求体里获取到用户对象并转换
+        // 从 session 获取用户对象
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATUS);
+        
+        // 先检查是否为 null
+        if (userObj == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "用户未登录");
+        }
+        
+        // 检查类型是否正确，防止类型转换异常
+        if (!(userObj instanceof LoginUserVO)) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录状态异常，请重新登录");
+        }
+        
+        // 安全地进行类型转换
         LoginUserVO loginUser = (LoginUserVO) userObj;
-        //判断是否空,id是否为空
-        if ((loginUser == null) || loginUser.getId()==null){
-            //为空抛出异常
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        
+        // 检查关键字段是否完整
+        if (loginUser.getId() == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "登录信息不完整");
         }
-        //查询用户信息，拿到最新的用户对象  ，防止缓存跟数据不一致。
-        User laestUser = this.getById(loginUser.getId());
-        //判断是否为空
-        if (laestUser==null){
-            //为空抛出异常  （可能被管理员封禁了）
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        
+        // 查询用户信息，拿到最新的用户对象，防止缓存跟数据不一致
+        User latestUser = this.getById(loginUser.getId());
+        
+        // 判断是否为空（可能被管理员删除或封禁）
+        if (latestUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "用户不存在或已被删除");
         }
-        //返回用户对象
-        return laestUser;
+        
+        // 返回用户对象
+        return latestUser;
     }
 
     @Override
@@ -228,13 +243,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (StrUtil.isBlank(user.getNickname())){
             user.setNickname("未命名");
         }
+
         //插入到数据库
-        boolean result = this.save(user);
-        if (!result) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "用户添加失败");
+        try {
+            boolean result = this.save(user);
+            if (!result) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "用户添加失败");
+            }
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            // 捕获唯一索引冲突异常
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账户已存在");
         }
 
-        return result;
+        return true;
     }
 
     @Override
@@ -262,6 +283,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "账户长度应为4-20之间");
             }
         }
+        //校验邮箱格式
+        String userEmail = userUpdateRequest.getEmail();
+        ValidationUtils.validateEmail(userEmail);
+        //校验手机号格式
+        String userMobile = userUpdateRequest.getMobile();
+        ValidationUtils.validateMobile(userMobile);
         //转换对象
         User user = new User();
         BeanUtils.copyProperties(userUpdateRequest, user);

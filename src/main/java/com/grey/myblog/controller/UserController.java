@@ -61,30 +61,6 @@ public class UserController {
         return Result.success(loginUserVo);
     }
 
-    /**
-     * 获取当前用户
-     */
-    @GetMapping("/getLoginUser")
-    public Result<LoginUserVO> getLoginUser(HttpServletRequest request) {
-        if (request==null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-
-        User loginUser = userService.getLoginUser(request);
-        return Result.success(userService.getLoginUserVo(loginUser));
-    }
-
-    /**
-     * 用户登出
-     */
-    @GetMapping("/logout")
-    public Result<Boolean> userLogout(HttpServletRequest request){
-        if (request==null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        boolean result = userService.userLogout(request);
-        return Result.success(result);
-    }
 
 
     /**
@@ -183,14 +159,27 @@ public class UserController {
     }
 
     /**
-     * 获取当前用户信息（用于编辑）
+     * 获取当前登录用户信息
      */
-    @GetMapping("/getCurrentUser")
-    public Result<UserVO> getCurrentUser(HttpServletRequest request) {
-        //获取当前登录用户
+    @GetMapping("/getLoginUser")
+    public Result<LoginUserVO> getLoginUser(HttpServletRequest request) {
+        if (request==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
         User loginUser = userService.getLoginUser(request);
-        ThrowUtil.throwIf(ObjUtil.isEmpty(loginUser),ErrorCode.NOT_LOGIN_ERROR,"当前未登录");
-        return Result.success(userService.getUserVo(loginUser));
+        return Result.success(userService.getLoginUserVo(loginUser));
+    }
+
+    /**
+     * 用户登出
+     */
+    @GetMapping("/logout")
+    public Result<Boolean> userLogout(HttpServletRequest request){
+        if (request==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean result = userService.userLogout(request);
+        return Result.success(result);
     }
 
 

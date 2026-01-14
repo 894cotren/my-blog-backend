@@ -43,6 +43,11 @@ public class UserUpdateRequest implements Serializable {
     private String email;
 
     /**
+     * 用户手机号
+     */
+    private String mobile;
+
+    /**
      * 用户角色：user/admin
      */
     private String role;
