@@ -1,9 +1,6 @@
 package com.grey.myblog.constant;
 
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * 用户模块所需常量
  * @author grey
@@ -26,11 +23,5 @@ public interface UserConstant {
      */
     String ADMIN ="admin";
 
-
-    /**
-     * 用户锁列表
-     */
-    Map<Long, Object> LOCK_MAP = new ConcurrentHashMap<>();
-    //endregion
 
 }

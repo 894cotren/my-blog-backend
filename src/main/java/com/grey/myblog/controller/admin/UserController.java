@@ -1,19 +1,16 @@
-package com.grey.myblog.controller;
+package com.grey.myblog.controller.admin;
 
 
 import cn.hutool.core.util.ObjUtil;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.grey.myblog.annotation.AuthCheck;
 import com.grey.myblog.common.Result;
-import com.grey.myblog.constant.UserConstant;
 import com.grey.myblog.exception.BusinessException;
 import com.grey.myblog.exception.ThrowUtil;
-import com.grey.myblog.model.DeleteRequest;
 import com.grey.myblog.model.entity.User;
 import com.grey.myblog.model.enums.ErrorCode;
-import com.grey.myblog.model.request.*;
+import com.grey.myblog.model.request.UserLoginRequest;
+import com.grey.myblog.model.request.UserRegisterRequest;
+import com.grey.myblog.model.request.UserUpdateRequest;
 import com.grey.myblog.model.vo.LoginUserVO;
-import com.grey.myblog.model.vo.UserVO;
 import com.grey.myblog.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -62,46 +59,6 @@ public class UserController {
     }
 
 
-
-    /**
-     * 用户添加
-     */
-    @PostMapping("/add")
-    @AuthCheck(mustRole = UserConstant.ADMIN)
-    public Result<Boolean> userAdd(@RequestBody UserAddRequest userAddRequest) {
-        if (ObjectUtils.isEmpty(userAddRequest)) {
-            return Result.fail(ErrorCode.PARAMS_ERROR);
-        }
-        boolean result = userService.userAdd(userAddRequest);
-        return Result.success(result);
-    }
-
-    /**
-     * 用户删除
-     */
-    @PostMapping("/delete")
-    public Result<Boolean> userDelete(@RequestBody DeleteRequest deleteRequest) {
-        /**
-         * 入参：用户id，封装一个deleterequest请求体来获取id吧
-         * 1. 校验用户id有效性
-         * 2. 进行删除
-         * 出参：boolean是否删除成功
-         */
-        //校验用户id有效性
-        if (ObjectUtils.isEmpty(deleteRequest)) {
-            return Result.fail(ErrorCode.PARAMS_ERROR);
-        }
-        if (deleteRequest.getId() <= 0L) {
-            return Result.fail(ErrorCode.PARAMS_ERROR);
-        }
-        //进行删除
-        boolean result = userService.removeById(deleteRequest.getId());
-        if (!result) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除用户失败");
-        }
-        return Result.success(result);
-    }
-
     /**
      * 用户更新
      */
@@ -123,40 +80,6 @@ public class UserController {
         return Result.success(result);
     }
 
-    /**
-     * 分页查询用户
-     */
-    @PostMapping("/pageList")
-    @AuthCheck(mustRole = UserConstant.ADMIN)
-    public Result<Page<UserVO>> userPageList(@RequestBody UserPageListRequest userPageListRequest) {
-
-        //校验非空
-        if (ObjectUtils.isEmpty(userPageListRequest)) {
-            return Result.fail(ErrorCode.PARAMS_ERROR);
-        }
-        //进行分页查询
-        Page<UserVO> userVoPage = userService.userPageList(userPageListRequest);
-        return Result.success(userVoPage);
-    }
-
-
-    /**
-     * 根据用户ID查询用户（注意配置管理员权限）
-     */
-    @GetMapping("/getUserById")
-    public Result<UserVO> getUserVoById(long id) {
-        //参数校验
-        if (id<=0){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"非法id");
-        }
-        //进行查询
-        User user = userService.getById(id);
-        //非空判断，如果为空，抛出无数据报错
-        if(user==null){
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
-        }
-        return Result.success(userService.getUserVo(user));
-    }
 
     /**
      * 获取当前登录用户信息
@@ -181,7 +104,6 @@ public class UserController {
         boolean result = userService.userLogout(request);
         return Result.success(result);
     }
-
 
 
 }
