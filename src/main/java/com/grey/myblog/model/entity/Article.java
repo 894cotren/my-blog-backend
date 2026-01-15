@@ -1,0 +1,85 @@
+package com.grey.myblog.model.entity;
+
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Date;
+
+/**
+ * 文章表
+ * @TableName article
+ */
+@TableName(value ="article")
+@Data
+public class Article implements Serializable {
+    /**
+     * 主键ID
+     */
+    @TableId(type = IdType.ASSIGN_ID)
+    private Long id;
+
+    /**
+     * 文章标题
+     */
+    private String title;
+
+    /**
+     * 文章内容
+     */
+    private String content;
+
+    /**
+     * 文章摘要
+     */
+    private String excerpt;
+
+    /**
+     * 封面图片URL
+     */
+    private String coverImage;
+
+    /**
+     * 排序权重（0为默认，1000为置顶）
+     */
+    private Integer sortOrder;
+
+    /**
+     * 阅读量
+     */
+    private Integer viewCount;
+
+    /**
+     * 所属分类ID
+     */
+    private Long categoryId;
+
+    /**
+     * 作者ID（关联用户表）
+     */
+    private Long authorId;
+
+    /**
+     * 文章状态（0-草稿，1-公开，2-私密）
+     */
+    private Integer status;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
+
+    /**
+     * 逻辑删除标记（0-正常，1-删除）
+     */
+    @TableLogic
+    private Integer isDelete;
+
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
+}

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.grey.myblog.mapper.ArticleMapper">
+
+    <resultMap id="BaseResultMap" type="com.grey.myblog.model.entity.Article">
+            <id property="id" column="id" />
+            <result property="title" column="title" />
+            <result property="content" column="content" />
+            <result property="excerpt" column="excerpt" />
+            <result property="coverImage" column="cover_image" />
+            <result property="sortOrder" column="sort_order" />
+            <result property="viewCount" column="view_count" />
+            <result property="categoryId" column="category_id" />
+            <result property="authorId" column="author_id" />
+            <result property="status" column="status" />
+            <result property="createTime" column="create_time" />
+            <result property="updateTime" column="update_time" />
+            <result property="isDelete" column="is_delete" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,title,content,excerpt,cover_image,sort_order,
+        view_count,category_id,author_id,status,create_time,
+        update_time,is_delete
+    </sql>
+</mapper>
