@@ -1,11 +1,11 @@
 package com.grey.myblog.service.impl;
 
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;import com.grey.myblog.exception.BusinessException;
+import com.grey.myblog.exception.ThrowUtil;
 import com.grey.myblog.model.entity.Article;
 import com.grey.myblog.model.entity.ArticleTag;
 import com.grey.myblog.model.entity.Category;
@@ -58,9 +58,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
     @Override
     public Page<ArticleVO> listArticles(ArticlePageListRequest request) {
-        if (request == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
+        // 参数非空校验
+        ThrowUtil.throwIf(request==null, ErrorCode.PARAMS_ERROR);
 
         // 参数校验：页码和每页数量不能小于1，设置默认值
         long pageNum = request.getPageNum();
@@ -73,13 +72,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         }
 
         try {
-            // 构建查询条件（分类、标签、状态筛选，排序）
-            QueryWrapper<Article> queryWrapper = buildQueryWrapper(request);
-            // 执行分页查询
-            Page<Article> articlePage = this.page(new Page<>(pageNum, pageSize), queryWrapper);
+            // 使用自定义 SQL 执行分页查询
+            Page<Article> articlePage = new Page<>(pageNum, pageSize);
+            Page<Article> resultPage = baseMapper.selectArticlePage(articlePage, request);
             
             // 转换为VO对象
-            List<ArticleVO> articleVOList = articlePage.getRecords().stream()
+            List<ArticleVO> articleVOList = resultPage.getRecords().stream()
                     .map(this::convertToArticleVO)
                     .collect(Collectors.toList());
             
@@ -87,7 +85,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
             fillAssociatedData(articleVOList);
             
             // 构建分页结果
-            Page<ArticleVO> articleVOPage = new Page<>(pageNum, pageSize, articlePage.getTotal());
+            Page<ArticleVO> articleVOPage = new Page<>(pageNum, pageSize, resultPage.getTotal());
             articleVOPage.setRecords(articleVOList);
             return articleVOPage;
         } catch (Exception e) {
@@ -247,55 +245,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         return this.updateById(article);
     }
 
-    /**
-     * 构建查询条件
-     */
-    private QueryWrapper<Article> buildQueryWrapper(ArticlePageListRequest request) {
-        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
-        
-        // 分类和状态筛选
-        queryWrapper.lambda()
-                .eq(ObjectUtil.isNotNull(request.getCategoryId()), Article::getCategoryId, request.getCategoryId())
-                .eq(ObjectUtil.isNotNull(request.getStatus()), Article::getStatus, request.getStatus());
-        
-        // 标签筛选：通过关联表查询文章ID列表
-        if (request.getTagId() != null) {
-            List<ArticleTag> articleTags = articleTagService.list(
-                    new LambdaQueryWrapper<ArticleTag>()
-                            .eq(ArticleTag::getTagId, request.getTagId())
-            );
-            if (articleTags.isEmpty()) {
-                // 无匹配标签时，设置不可能的条件，返回空结果
-                queryWrapper.lambda().eq(Article::getId, -1);
-            } else {
-                // 提取文章ID列表，使用IN查询
-                List<Long> articleIds = articleTags.stream()
-                        .map(ArticleTag::getArticleId)
-                        .collect(Collectors.toList());
-                queryWrapper.lambda().in(Article::getId, articleIds);
-            }
-        }
-        
-        // 排序处理：支持按创建时间或阅读量排序
-        String sortField = request.getSortField();
-        String sortOrder = request.getSortOrder();
-        if (StrUtil.isNotBlank(sortField)) {
-            boolean isDesc = "descend".equals(sortOrder) || "desc".equals(sortOrder);
-            if ("create_time".equals(sortField) || "createTime".equals(sortField)) {
-                queryWrapper.lambda().orderBy(true, isDesc, Article::getCreateTime);
-            } else if ("view_count".equals(sortField) || "viewCount".equals(sortField)) {
-                queryWrapper.lambda().orderBy(true, isDesc, Article::getViewCount);
-            } else {
-                // 未知排序字段，默认按创建时间降序
-                queryWrapper.lambda().orderByDesc(Article::getCreateTime);
-            }
-        } else {
-            // 未指定排序字段，默认按创建时间降序
-            queryWrapper.lambda().orderByDesc(Article::getCreateTime);
-        }
-        
-        return queryWrapper;
-    }
 
     /**
      * 转换为ArticleVO
@@ -318,6 +267,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     /**
      * 填充关联数据（分类、作者、标签）
      * 采用批量查询策略，避免N+1查询问题
+     * TODO 可优化，标签、分类、作者均可实现缓存。
      */
     private void fillAssociatedData(List<ArticleVO> articleVOList) {
         if (articleVOList == null || articleVOList.isEmpty()) {

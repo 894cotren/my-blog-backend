@@ -1,7 +1,10 @@
 package com.grey.myblog.mapper;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.grey.myblog.model.entity.Article;
+import com.grey.myblog.model.request.ArticlePageListRequest;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
 * @author grey
@@ -11,6 +14,14 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface ArticleMapper extends BaseMapper<Article> {
 
+    /**
+     * 自定义分页查询文章列表
+     *
+     * @param page 分页对象
+     * @param request 查询请求参数
+     * @return 分页结果
+     */
+    Page<Article> selectArticlePage(Page<Article> page, @Param("request") ArticlePageListRequest request);
 }
 
 

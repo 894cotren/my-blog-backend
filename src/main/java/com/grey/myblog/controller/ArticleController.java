@@ -38,10 +38,10 @@ public class ArticleController {
     private UserService userService;
 
     /**
-     * 文章列表（主页）
+     * 文章列表（主页）（无正文，只有摘要）
      */
-    @GetMapping("/list")
-    public Result<Page<ArticleVO>> listArticles(ArticlePageListRequest request) {
+    @PostMapping("/list")
+    public Result<Page<ArticleVO>> listArticles(@RequestBody ArticlePageListRequest request) {
         // 请求参数为空时使用默认值，避免空指针异常
         if (request == null) {
             request = new ArticlePageListRequest();

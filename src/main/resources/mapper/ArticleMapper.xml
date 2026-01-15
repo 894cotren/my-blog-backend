@@ -25,4 +25,72 @@
         view_count,category_id,author_id,status,create_time,
         update_time,is_delete
     </sql>
+
+    <!-- 自定义分页查询文章列表 -->
+    <select id="selectArticlePage" resultMap="BaseResultMap">
+        SELECT
+            id,
+            title,
+            excerpt,
+            cover_image,
+            sort_order,
+            view_count,
+            category_id,
+            author_id,
+            status,
+            create_time,
+            update_time,
+            is_delete
+        FROM article
+        <where>
+            is_delete = 0
+            <if test="request.categoryId != null">
+                AND category_id = #{request.categoryId}
+            </if>
+            <if test="request.status != null">
+                AND status = #{request.status}
+            </if>
+            <if test="request.tagId != null">
+                AND EXISTS (
+                    SELECT 1 FROM article_tag
+                    WHERE article_tag.article_id = article.id
+                    AND article_tag.tag_id = #{request.tagId}
+                )
+            </if>
+        </where>
+        <choose>
+            <when test="request.sortField != null and request.sortField != ''">
+                <choose>
+                    <when test="request.sortField == 'create_time' or request.sortField == 'createTime'">
+                        ORDER BY create_time
+                        <choose>
+                            <when test="request.sortOrder == 'descend' or request.sortOrder == 'desc'">
+                                DESC
+                            </when>
+                            <otherwise>
+                                ASC
+                            </otherwise>
+                        </choose>
+                    </when>
+                    <when test="request.sortField == 'view_count' or request.sortField == 'viewCount'">
+                        ORDER BY view_count
+                        <choose>
+                            <when test="request.sortOrder == 'descend' or request.sortOrder == 'desc'">
+                                DESC
+                            </when>
+                            <otherwise>
+                                ASC
+                            </otherwise>
+                        </choose>
+                    </when>
+                    <otherwise>
+                        ORDER BY create_time DESC
+                    </otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                ORDER BY create_time DESC
+            </otherwise>
+        </choose>
+    </select>
 </mapper>

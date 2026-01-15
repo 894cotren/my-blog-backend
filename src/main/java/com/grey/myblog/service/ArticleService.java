@@ -20,7 +20,7 @@ import java.util.Map;
 public interface ArticleService extends IService<Article> {
 
     /**
-     * 分页查询文章列表
+     * 分页查询文章列表 (文章只返回摘要，不返回完整内容)
      *
      * @param request 分页查询请求
      * @return 分页文章列表
