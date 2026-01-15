@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `article` (
     `title`         varchar(255)    NOT NULL                COMMENT '文章标题',
     `content`       longtext                                COMMENT '文章内容',
     `excerpt`       varchar(500)    DEFAULT NULL            COMMENT '文章摘要',
-    `cover_image`   varchar(500)    DEFAULT NULL            COMMENT '封面图片URL',
+    `cover_image`   varchar(1024)    DEFAULT NULL            COMMENT '封面图片URL',
     `sort_order`    int             NOT NULL DEFAULT '0'    COMMENT '排序权重（0为默认，1000为置顶）',
     `view_count`    int             NOT NULL DEFAULT '0'    COMMENT '阅读量',
     `category_id`   bigint          DEFAULT NULL            COMMENT '所属分类ID',

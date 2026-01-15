@@ -1,27 +1,68 @@
 package com.grey.myblog.aop;
 
 import com.grey.myblog.annotation.AuthCheck;
+import com.grey.myblog.exception.BusinessException;
+import com.grey.myblog.model.entity.User;
+import com.grey.myblog.model.enums.ErrorCode;
+import com.grey.myblog.model.enums.UserRoleEnum;
+import com.grey.myblog.service.UserService;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-//@Aspect
-//@Component
+@Aspect
+@Component
 public class AuthInterceptor {
 
+
+    @Resource
+    private UserService userService;
+
     /**
-     * 执行拦截
-     *
-     * @param joinPoint 切入点
-     * @param authCheck 权限校验注解
+     * 接口鉴权
+     * @param joinPoint
+     * @param authCheck
      * @return
      * @throws Throwable
      */
     @Around("@annotation(authCheck)")
-    public Object doInterceptor(ProceedingJoinPoint joinPoint, AuthCheck authCheck) throws Throwable {
+    public Object aroundAdvice(ProceedingJoinPoint joinPoint, AuthCheck authCheck) throws Throwable {
+        /**
+         * 1. 获取到角色对应的枚举对象
+         *    1. 枚举对象为空应该报错吧。权限异常   （上了权限注解但是没指定权限的情况）
+         * 2. 获取到当前请求对象 ，再通过request获取当前用户
+         * 3. 对比当前用户的角色和权限需要的角色，校验权限是否足够
+         *    1. 权限不够直接抛异常
+         * 4. 权限足够放行。
+         */
+        //获取到角色对应的枚举对象
         String mustRole = authCheck.mustRole();
-        // 获取当前登录用户 实现鉴权逻辑
-        // mustRole为注解传入必须要的角色字段，通过这个字段进行简单鉴权。
-        // 通过普通用户的权限校验，放行
+        UserRoleEnum mustRoleEnum = UserRoleEnum.getRoleEnumByValue(mustRole);
+        //枚举对象为空应该报错吧。权限异常   （上了权限注解但是没指定权限的情况）
+        if (mustRoleEnum==null){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注解未指定权限等级");
+        }
+        //获取到当前请求对象 ，再通过request获取当前用户
+        RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
+        HttpServletRequest request =((ServletRequestAttributes)requestAttributes).getRequest();
+        //这个获取方法里如果当前角色为空会抛异常的，所以能出来必定拿到了
+        User loginUser = userService.getLoginUser(request);
+        //对比当前用户的角色和权限需要的角色，校验权限是否足够
+        UserRoleEnum userRoleEnum = UserRoleEnum.getRoleEnumByValue(loginUser.getRole());
+        if (userRoleEnum==null){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+        //如果用户权限不够所指定的权限，并且不是管理员，就抛异常。
+        if (!mustRoleEnum.equals(userRoleEnum) && !userRoleEnum.equals(UserRoleEnum.ADMIN_USER)){
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        //权限足够放行
         return joinPoint.proceed();
     }
 }
