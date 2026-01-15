@@ -98,6 +98,7 @@ public class ArticleController {
 
     /**
      * 更新文章（管理员）
+     * 校验参数和权限，更新文章内容并重新保存标签关联关系
      */
     @PostMapping("/update")
     @AuthCheck(mustRole = "admin")
@@ -114,6 +115,7 @@ public class ArticleController {
 
     /**
      * 删除文章（管理员）
+     * 校验参数和权限，执行逻辑删除文章
      */
     @PostMapping("/delete")
     @AuthCheck(mustRole = "admin")

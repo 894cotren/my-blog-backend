@@ -215,6 +215,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         return article.getId();
     }
 
+    /**
+     * 更新文章
+     * 校验参数和权限，更新文章内容，删除旧标签关联并保存新标签关联关系
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateArticle(ArticleUpdateRequest request, User loginUser) {
@@ -222,17 +226,21 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文章ID不能为空");
         }
         
+        // 校验请求参数（标题、内容等）
         validateArticleRequest(request);
         
+        // 查询原文章，检查是否存在
         Article existingArticle = this.getById(request.getId());
         if (existingArticle == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "文章不存在");
         }
         
+        // 权限校验：管理员或文章作者才能修改
         if (!userService.isAdmin(loginUser) && !existingArticle.getAuthorId().equals(loginUser.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限修改此文章");
         }
         
+        // 更新文章内容
         Article article = new Article();
         BeanUtils.copyProperties(request, article);
         article.setUpdateTime(new Date());
@@ -242,6 +250,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新文章失败");
         }
         
+        // 删除旧标签关联，重新保存新标签关联关系
         deleteArticleTags(request.getId());
         if (request.getTagIds() != null && !request.getTagIds().isEmpty()) {
             saveArticleTags(request.getId(), request.getTagIds());
@@ -250,21 +259,28 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         return true;
     }
 
+    /**
+     * 删除文章
+     * 校验参数和权限，执行逻辑删除（MyBatis-Plus会自动处理isDelete标记）
+     */
     @Override
     public Boolean deleteArticle(Long id, User loginUser) {
         if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文章ID无效");
         }
         
+        // 查询文章，检查是否存在
         Article article = this.getById(id);
         if (article == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "文章不存在");
         }
         
+        // 权限校验：管理员或文章作者才能删除
         if (!userService.isAdmin(loginUser) && !article.getAuthorId().equals(loginUser.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限删除此文章");
         }
         
+        // 执行逻辑删除（MyBatis-Plus会自动设置isDelete=1）
         return this.removeById(id);
     }
 
@@ -422,7 +438,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     /**
-     * 删除文章标签关联
+     * 删除文章的所有标签关联关系
+     * 用于更新文章时清除旧标签
      */
     private void deleteArticleTags(Long articleId) {
         articleTagService.remove(

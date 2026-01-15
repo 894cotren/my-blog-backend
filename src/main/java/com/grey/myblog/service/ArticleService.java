@@ -59,19 +59,21 @@ public interface ArticleService extends IService<Article> {
 
     /**
      * 更新文章
+     * 校验参数和权限，更新文章内容，删除旧标签关联并保存新标签关联关系
      *
-     * @param request   更新请求
-     * @param loginUser 当前登录用户
-     * @return 是否成功
+     * @param request   更新请求，包含文章ID和要更新的内容
+     * @param loginUser 当前登录用户，用于权限校验
+     * @return 是否更新成功
      */
     Boolean updateArticle(ArticleUpdateRequest request, User loginUser);
 
     /**
      * 删除文章
+     * 校验参数和权限，执行逻辑删除（设置isDelete标记）
      *
      * @param id        文章ID
-     * @param loginUser 当前登录用户
-     * @return 是否成功
+     * @param loginUser 当前登录用户，用于权限校验
+     * @return 是否删除成功
      */
     Boolean deleteArticle(Long id, User loginUser);
 
