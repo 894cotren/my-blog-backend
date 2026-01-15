@@ -16,6 +16,7 @@ import com.grey.myblog.model.request.ArticleAddRequest;
 import com.grey.myblog.model.request.ArticlePageListRequest;
 import com.grey.myblog.model.request.ArticleUpdateRequest;
 import com.grey.myblog.model.vo.ArticleVO;
+import com.grey.myblog.model.vo.ArticleArchiveVO;
 import com.grey.myblog.model.vo.CategoryVO;
 import com.grey.myblog.model.vo.TagVO;
 import com.grey.myblog.service.ArticleService;
@@ -94,70 +95,105 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         }
     }
 
+    /**
+     * 获取文章详情
+     * 查询文章实体，自动增加阅读量，转换为VO并填充关联数据
+     */
     @Override
     public ArticleVO getArticleById(Long id) {
-        if (id == null || id <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "文章ID无效");
-        }
+        ThrowUtil.throwIf(id == null || id <= 0, ErrorCode.PARAMS_ERROR, "文章ID无效");
 
         Article article = this.getById(id);
         if (article == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "文章不存在");
         }
 
+        // 增加阅读量
         incrementViewCount(id);
         
+        // 转换为VO并填充关联数据
         ArticleVO articleVO = convertToArticleVO(article);
         fillAssociatedData(Collections.singletonList(articleVO));
         return articleVO;
     }
 
+    /**
+     * 获取文章归档列表（轻量级）
+     * 只查询必要字段（id、title、createTime、categoryId），填充分类和标签信息，按年月分组返回
+     */
     @Override
-    public Map<String, Map<String, List<ArticleVO>>> getArticleArchive(Integer year, Integer month) {
+    public Map<String, Map<String, List<ArticleArchiveVO>>> getArticleArchive(Integer year, Integer month) {
+        // 构建查询条件：只查询公开文章，只查询必要字段
         QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().eq(Article::getStatus, 1);
+        queryWrapper.lambda()
+                .select(Article::getId, Article::getTitle, Article::getCreateTime, Article::getCategoryId)
+                .eq(Article::getStatus, 1);
         
+        // 按年份筛选（如果指定）
         if (year != null) {
             queryWrapper.lambda().apply("YEAR(create_time) = {0}", year);
         }
-        if (month != null) {
+        // 按年份、月份筛选（如果指定）
+        if (year!= null && month != null) {
             queryWrapper.lambda().apply("MONTH(create_time) = {0}", month);
         }
         
+        // 按创建时间倒序排序
         queryWrapper.lambda().orderByDesc(Article::getCreateTime);
-        
+
+        // 查询文章列表（只包含必要字段）
         List<Article> articles = this.list(queryWrapper);
-        List<ArticleVO> articleVOList = articles.stream()
-                .map(this::convertToArticleVO)
+
+        // 转换为轻量级归档VO，并保存articleId到categoryId的映射
+        Map<Long, Long> articleCategoryMap = new HashMap<>();
+        List<ArticleArchiveVO> archiveVOList = articles.stream()
+                .map(article -> {
+                    ArticleArchiveVO archiveVO = convertToArticleArchiveVO(article);
+                    if (article.getCategoryId() != null) {
+                        articleCategoryMap.put(archiveVO.getId(), article.getCategoryId());
+                    }
+                    return archiveVO;
+                })
                 .collect(Collectors.toList());
         
-        fillAssociatedData(articleVOList);
+        // 批量填充分类和标签信息（不填充作者信息）
+        fillArchiveAssociatedData(archiveVOList, articleCategoryMap);
         
-        Map<String, Map<String, List<ArticleVO>>> archiveMap = new LinkedHashMap<>();
+        // 按年月分组：Map<年份, Map<月份, List<文章归档VO>>>
+        Map<String, Map<String, List<ArticleArchiveVO>>> archiveMap = new LinkedHashMap<>();
         SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
         SimpleDateFormat monthFormat = new SimpleDateFormat("MM");
         
-        for (ArticleVO articleVO : articleVOList) {
-            if (articleVO.getCreateTime() == null) {
+        for (ArticleArchiveVO archiveVO : archiveVOList) {
+            // 跳过创建时间为空的文章
+            if (archiveVO.getCreateTime() == null) {
                 continue;
             }
             
-            String yearStr = yearFormat.format(articleVO.getCreateTime());
-            String monthStr = monthFormat.format(articleVO.getCreateTime());
+            // 提取年份和月份字符串
+            String yearStr = yearFormat.format(archiveVO.getCreateTime());
+            String monthStr = monthFormat.format(archiveVO.getCreateTime());
             
+            // 按年月分组，使用 computeIfAbsent 自动创建嵌套 Map 和 List
             archiveMap.computeIfAbsent(yearStr, k -> new LinkedHashMap<>())
                     .computeIfAbsent(monthStr, k -> new ArrayList<>())
-                    .add(articleVO);
+                    .add(archiveVO);
         }
         
         return archiveMap;
     }
 
+    /**
+     * 创建文章
+     * 校验参数，创建文章实体并保存，如果指定了标签则批量保存标签关联关系
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long addArticle(ArticleAddRequest request, User loginUser) {
+        // 校验请求参数（标题、内容等）
         validateArticleRequest(request);
         
+        // 创建文章实体，复制请求参数并设置默认值
         Article article = new Article();
         BeanUtils.copyProperties(request, article);
         article.setAuthorId(loginUser.getId());
@@ -165,11 +201,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         article.setCreateTime(new Date());
         article.setUpdateTime(new Date());
         
+        // 保存文章
         boolean saved = this.save(article);
         if (!saved) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "创建文章失败");
         }
         
+        // 如果指定了标签，批量保存文章-标签关联关系
         if (request.getTagIds() != null && !request.getTagIds().isEmpty()) {
             saveArticleTags(article.getId(), request.getTagIds());
         }
@@ -230,6 +268,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         return this.removeById(id);
     }
 
+    /**
+     * 增加文章阅读量
+     * 每次访问文章详情时调用，阅读量+1
+     */
     @Override
     public Boolean incrementViewCount(Long id) {
         if (id == null || id <= 0) {
@@ -247,7 +289,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
 
 
     /**
-     * 转换为ArticleVO
+     * 将文章实体转换为VO对象
+     * 复制基本属性，并计算文章字数统计
      */
     private ArticleVO convertToArticleVO(Article article) {
         if (article == null) {
@@ -265,8 +308,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     /**
-     * 填充关联数据（分类、作者、标签）
-     * 采用批量查询策略，避免N+1查询问题
+     * 批量填充文章关联数据
+     * 采用批量查询策略，一次性查询所有分类、作者、标签，避免N+1查询问题
+     * 填充分类信息、作者信息、标签列表到ArticleVO中
      * TODO 可优化，标签、分类、作者均可实现缓存。
      */
     private void fillAssociatedData(List<ArticleVO> articleVOList) {
@@ -359,7 +403,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     /**
-     * 保存文章标签关联
+     * 批量保存文章标签关联关系
+     * 为文章创建与多个标签的关联记录
      */
     private void saveArticleTags(Long articleId, List<Long> tagIds) {
         List<ArticleTag> articleTags = tagIds.stream()
@@ -387,7 +432,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     /**
-     * 校验文章请求参数（创建）
+     * 校验文章创建请求参数
+     * 检查请求对象和公共字段（标题、内容）
      */
     private void validateArticleRequest(ArticleAddRequest request) {
         if (request == null) {
@@ -407,7 +453,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
     }
 
     /**
-     * 校验文章公共字段（标题和内容）
+     * 校验文章公共字段
+     * 检查标题和内容不能为空
      */
     private void validateArticleCommonFields(String title, String content) {
         if (StrUtil.isBlank(title)) {
@@ -464,5 +511,98 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article>
         authorVO.setNickname(user.getNickname());
         authorVO.setAvatar(user.getAvatar());
         return authorVO;
+    }
+
+    /**
+     * 将文章实体转换为归档VO对象
+     * 只复制必要字段：id、title、createTime
+     *
+     */
+    private ArticleArchiveVO convertToArticleArchiveVO(Article article) {
+        if (article == null) {
+            return null;
+        }
+        ArticleArchiveVO archiveVO = new ArticleArchiveVO();
+        archiveVO.setId(article.getId());
+        archiveVO.setTitle(article.getTitle());
+        archiveVO.setCreateTime(article.getCreateTime());
+        return archiveVO;
+    }
+
+    /**
+     * 批量填充归档文章的关联数据（只填充分类和标签，不填充作者）
+     * 采用批量查询策略，避免N+1查询问题
+     * TODO 可优化，标签、分类、作者均可实现缓存。
+     * @param archiveVOList 归档VO列表
+     * @param articleCategoryMap 文章ID到分类ID的映射
+     */
+    private void fillArchiveAssociatedData(List<ArticleArchiveVO> archiveVOList, Map<Long, Long> articleCategoryMap) {
+        if (archiveVOList == null || archiveVOList.isEmpty()) {
+            return;
+        }
+        
+        // 收集所有需要查询的分类ID
+        Set<Long> categoryIds = new HashSet<>(articleCategoryMap.values());
+        
+        // 批量查询分类信息
+        Map<Long, CategoryVO> categoryMap = new HashMap<>();
+        if (!categoryIds.isEmpty()) {
+            List<Category> categories = categoryService.listByIds(categoryIds);
+            categoryMap = categories.stream()
+                    .map(this::convertToCategoryVO)
+                    .collect(Collectors.toMap(CategoryVO::getId, vo -> vo));
+        }
+        
+        // 收集所有文章ID
+        List<Long> articleIds = archiveVOList.stream()
+                .map(ArticleArchiveVO::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        
+        // 批量查询文章标签关联关系
+        Map<Long, List<TagVO>> articleTagMap = new HashMap<>();
+        if (!articleIds.isEmpty()) {
+            // 查询文章-标签关联表
+            List<ArticleTag> articleTags = articleTagService.list(
+                    new LambdaQueryWrapper<ArticleTag>()
+                            .in(ArticleTag::getArticleId, articleIds)
+            );
+            
+            // 提取标签ID集合
+            Set<Long> tagIds = articleTags.stream()
+                    .map(ArticleTag::getTagId)
+                    .collect(Collectors.toSet());
+            
+            // 批量查询标签信息
+            if (!tagIds.isEmpty()) {
+                List<Tag> tags = tagService.listByIds(tagIds);
+                Map<Long, TagVO> tagMap = tags.stream()
+                        .map(this::convertToTagVO)
+                        .collect(Collectors.toMap(TagVO::getId, vo -> vo));
+                
+                // 构建文章ID到标签列表的映射
+                for (ArticleTag articleTag : articleTags) {
+                    TagVO tagVO = tagMap.get(articleTag.getTagId());
+                    if (tagVO != null) {
+                        articleTagMap.computeIfAbsent(articleTag.getArticleId(), k -> new ArrayList<>())
+                                .add(tagVO);
+                    }
+                }
+            }
+        }
+        
+        // 将查询到的关联数据填充到ArticleArchiveVO中
+        for (ArticleArchiveVO archiveVO : archiveVOList) {
+            // 填充分类信息
+            Long categoryId = articleCategoryMap.get(archiveVO.getId());
+            if (categoryId != null) {
+                CategoryVO categoryVO = categoryMap.get(categoryId);
+                archiveVO.setCategory(categoryVO);
+            }
+            
+            // 填充标签列表，如果为空则设置为空列表
+            List<TagVO> tags = articleTagMap.get(archiveVO.getId());
+            archiveVO.setTags(tags != null ? tags : new ArrayList<>());
+        }
     }
 }

@@ -11,6 +11,7 @@ import com.grey.myblog.model.request.ArticleAddRequest;
 import com.grey.myblog.model.request.ArticlePageListRequest;
 import com.grey.myblog.model.request.ArticleUpdateRequest;
 import com.grey.myblog.model.vo.ArticleVO;
+import com.grey.myblog.model.vo.ArticleArchiveVO;
 import com.grey.myblog.service.ArticleService;
 import com.grey.myblog.service.UserService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -51,7 +52,9 @@ public class ArticleController {
     }
 
     /**
-     * 文章详情
+     * 获取文章详情
+     * 返回完整文章内容，包含正文、分类、作者、标签等关联信息
+     * 访问时自动增加阅读量
      */
     @GetMapping("/{id}")
     public Result<ArticleVO> getArticleById(@PathVariable Long id) {
@@ -63,18 +66,22 @@ public class ArticleController {
     }
 
     /**
-     * 文章归档（按时间）
+     * 获取文章归档列表（轻量级）
+     * 按年月分组返回文章列表，支持按年份或年月筛选
+     * 只返回必要字段：id、title、createTime、category、tags
+     * 返回格式：Map<年份, Map<月份, List<文章归档VO>>>z
      */
     @GetMapping("/archive")
-    public Result<Map<String, Map<String, List<ArticleVO>>>> getArticleArchive(
+    public Result<Map<String, Map<String, List<ArticleArchiveVO>>>> getArticleArchive(
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month) {
-        Map<String, Map<String, List<ArticleVO>>> archiveMap = articleService.getArticleArchive(year, month);
+        Map<String, Map<String, List<ArticleArchiveVO>>> archiveMap = articleService.getArticleArchive(year, month);
         return Result.success(archiveMap);
     }
 
     /**
      * 创建文章（管理员）
+     * 校验参数和登录状态，创建文章并保存标签关联关系
      */
     @PostMapping("/add")
     @AuthCheck(mustRole = "admin")
@@ -121,15 +128,4 @@ public class ArticleController {
         return Result.success(result);
     }
 
-    /**
-     * 增加阅读量
-     */
-    @PostMapping("/incrementView/{id}")
-    public Result<Boolean> incrementView(@PathVariable Long id) {
-        if (id == null || id <= 0) {
-            return Result.fail(ErrorCode.PARAMS_ERROR, "文章ID无效");
-        }
-        Boolean result = articleService.incrementViewCount(id);
-        return Result.success(result);
-    }
 }

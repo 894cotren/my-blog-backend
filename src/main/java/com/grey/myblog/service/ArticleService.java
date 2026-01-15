@@ -7,6 +7,7 @@ import com.grey.myblog.model.request.ArticleAddRequest;
 import com.grey.myblog.model.request.ArticlePageListRequest;
 import com.grey.myblog.model.request.ArticleUpdateRequest;
 import com.grey.myblog.model.vo.ArticleVO;
+import com.grey.myblog.model.vo.ArticleArchiveVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -28,28 +29,31 @@ public interface ArticleService extends IService<Article> {
     Page<ArticleVO> listArticles(ArticlePageListRequest request);
 
     /**
-     * 获取文章详情（自动增加阅读量）
+     * 获取文章详情
+     * 查询文章完整信息（包含正文），自动增加阅读量，并填充关联数据（分类、作者、标签）
      *
      * @param id 文章ID
-     * @return 文章详情
+     * @return 文章详情VO，包含完整内容和关联信息
      */
     ArticleVO getArticleById(Long id);
 
     /**
-     * 文章归档（按年月）
+     * 获取文章归档列表（轻量级）
+     * 只查询必要字段（id、title、createTime），填充分类和标签信息，按年月分组返回
      *
-     * @param year  年份（可选）
-     * @param month 月份（可选）
-     * @return 按年月分组的文章列表 Map<年份, Map<月份, List<文章>>>
+     * @param year  年份（可选），筛选指定年份的文章
+     * @param month 月份（可选），筛选指定月份的文章
+     * @return 按年月分组的文章归档列表，格式：Map<年份, Map<月份, List<文章归档VO>>>
      */
-    Map<String, Map<String, List<ArticleVO>>> getArticleArchive(Integer year, Integer month);
+    Map<String, Map<String, List<ArticleArchiveVO>>> getArticleArchive(Integer year, Integer month);
 
     /**
      * 创建文章
+     * 校验请求参数，创建文章实体并保存，如果指定了标签则保存标签关联关系
      *
-     * @param request   创建请求
-     * @param loginUser 当前登录用户
-     * @return 文章ID
+     * @param request   创建请求，包含标题、内容、分类、标签等信息
+     * @param loginUser 当前登录用户，作为文章作者
+     * @return 创建成功的文章ID
      */
     Long addArticle(ArticleAddRequest request, User loginUser);
 
