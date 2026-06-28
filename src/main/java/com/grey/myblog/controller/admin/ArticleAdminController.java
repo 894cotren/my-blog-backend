@@ -84,7 +84,7 @@ public class ArticleAdminController {
      * 校验参数和登录状态，创建文章并保存标签关联关系
      */
     @PostMapping("/add")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck
     public Result<Long> addArticle(@RequestBody ArticleAddRequest request, HttpServletRequest httpRequest) {
         if (ObjectUtils.isEmpty(request)) {
             return Result.fail(ErrorCode.PARAMS_ERROR, "请求参数不能为空");
@@ -101,7 +101,7 @@ public class ArticleAdminController {
      * 校验参数和权限，更新文章内容并重新保存标签关联关系
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck
     public Result<Boolean> updateArticle(@RequestBody ArticleUpdateRequest request, HttpServletRequest httpRequest) {
         if (ObjectUtils.isEmpty(request)) {
             return Result.fail(ErrorCode.PARAMS_ERROR, "请求参数不能为空");
@@ -118,7 +118,7 @@ public class ArticleAdminController {
      * 校验参数和权限，执行逻辑删除文章
      */
     @PostMapping("/delete")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck
     public Result<Boolean> deleteArticle(@RequestBody DeleteRequest deleteRequest, HttpServletRequest httpRequest) {
         if (ObjectUtils.isEmpty(deleteRequest)) {
             return Result.fail(ErrorCode.PARAMS_ERROR, "请求参数不能为空");

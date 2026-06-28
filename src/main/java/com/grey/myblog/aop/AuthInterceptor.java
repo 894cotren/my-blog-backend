@@ -28,31 +28,13 @@ public class AuthInterceptor {
 
     /**
      * 接口鉴权
-     * @param joinPoint
-     * @param authCheck
-     * @return
-     * @throws Throwable
+     * 默认校验是否登录，mustRole 指定具体角色时才校验角色
      */
     @Around("@annotation(authCheck)")
     public Object aroundAdvice(ProceedingJoinPoint joinPoint, AuthCheck authCheck) throws Throwable {
-        /**
-         * 1. 获取到角色对应的枚举对象
-         *    1. 枚举对象为空应该报错吧。权限异常   （上了权限注解但是没指定权限的情况）
-         * 2. 获取到当前请求对象 ，再通过request获取当前用户
-         * 3. 对比当前用户的角色和权限需要的角色，校验权限是否足够
-         *    1. 权限不够直接抛异常
-         * 4. 权限足够放行。
-         */
-        //获取到角色对应的枚举对象
-        String mustRole = authCheck.mustRole();
-        UserRoleEnum mustRoleEnum = UserRoleEnum.getRoleEnumByValue(mustRole);
-        //枚举对象为空应该报错吧。权限异常   （上了权限注解但是没指定权限的情况）
-        if (mustRoleEnum==null){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注解未指定权限等级");
-        }
-        //获取到当前请求对象 ，再通过request获取当前用户
+        // 获取当前请求对象
         RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
-        HttpServletRequest request =((ServletRequestAttributes)requestAttributes).getRequest();
+        HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 
         // 校验请求头是否携带 token
         String token = request.getHeader(UserConstant.TOKEN_HEADER_KEY);
@@ -60,18 +42,31 @@ public class AuthInterceptor {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "用户未登录");
         }
 
-        //这个获取方法里如果当前角色为空会抛异常的，所以能出来必定拿到了
+        // 获取当前登录用户（内部会校验 token 有效性）
         UserDO loginUser = userService.getLoginUser(request);
-        //对比当前用户的角色和权限需要的角色，校验权限是否足够
-        UserRoleEnum userRoleEnum = UserRoleEnum.getRoleEnumByValue(loginUser.getRole());
-        if (userRoleEnum==null){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+
+        // 获取注解指定的角色
+        String mustRole = authCheck.mustRole();
+
+        // 如果指定了角色，则校验角色权限
+        if (StrUtil.isNotBlank(mustRole)) {
+            UserRoleEnum mustRoleEnum = UserRoleEnum.getRoleEnumByValue(mustRole);
+            if (mustRoleEnum == null) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注解指定的角色不存在");
+            }
+
+            UserRoleEnum userRoleEnum = UserRoleEnum.getRoleEnumByValue(loginUser.getRole());
+            if (userRoleEnum == null) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "用户角色异常");
+            }
+
+            // 用户角色不匹配且不是管理员，则拒绝
+            if (!mustRoleEnum.equals(userRoleEnum) && !userRoleEnum.equals(UserRoleEnum.ADMIN_USER)) {
+                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+            }
         }
-        //如果用户权限不够所指定的权限，并且不是管理员，就抛异常。
-        if (!mustRoleEnum.equals(userRoleEnum) && !userRoleEnum.equals(UserRoleEnum.ADMIN_USER)){
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        //权限足够放行
+
+        // 放行
         return joinPoint.proceed();
     }
 }

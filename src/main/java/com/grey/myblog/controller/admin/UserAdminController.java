@@ -1,10 +1,8 @@
 package com.grey.myblog.controller.admin;
 
 
-import cn.hutool.core.util.ObjUtil;
+import com.grey.myblog.annotation.AuthCheck;
 import com.grey.myblog.common.Result;
-import com.grey.myblog.exception.BusinessException;
-import com.grey.myblog.exception.AssertUtil;
 import com.grey.myblog.model.dataobject.UserDO;
 import com.grey.myblog.model.enums.ErrorCode;
 import com.grey.myblog.model.request.UserLoginRequest;
@@ -63,6 +61,7 @@ public class UserAdminController {
      * 用户更新
      */
     @PostMapping("/update")
+    @AuthCheck
     public Result<Boolean> userUpdate(@RequestBody UserUpdateRequest userUpdateRequest,
                                       HttpServletRequest request) {
 
@@ -72,8 +71,6 @@ public class UserAdminController {
         }
         // 获取当前登录用户
         UserDO loginUser = userService.getLoginUser(request);
-        AssertUtil.isFalse(ObjUtil.isEmpty(loginUser), ErrorCode.NOT_LOGIN_ERROR, "当前未登录");
-
 
         // 进行更新
         boolean result = userService.updateUser(userUpdateRequest, loginUser);
@@ -85,10 +82,8 @@ public class UserAdminController {
      * 获取当前登录用户信息
      */
     @GetMapping("/getLoginUser")
+    @AuthCheck
     public Result<UserDTO> getLoginUser(HttpServletRequest request) {
-        if (request == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
         UserDO loginUser = userService.getLoginUser(request);
         return Result.success(userService.getLoginUserVo(loginUser));
     }
@@ -97,10 +92,8 @@ public class UserAdminController {
      * 用户登出
      */
     @GetMapping("/logout")
+    @AuthCheck
     public Result<Boolean> userLogout(HttpServletRequest request) {
-        if (request == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
         boolean result = userService.userLogout(request);
         return Result.success(result);
     }

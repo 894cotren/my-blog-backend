@@ -30,7 +30,7 @@ public class WebsiteInfoAdminController {
      * 获取网站信息
      */
     @GetMapping("/get")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck
     public Result<WebsiteInfoDTO> getWebsiteInfo() {
         return Result.success(websiteInfoService.getWebsiteInfo());
     }
@@ -39,7 +39,7 @@ public class WebsiteInfoAdminController {
      * 更新网站信息
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck
     public Result<Boolean> updateWebsiteInfo(@RequestBody WebsiteInfoUpdateRequest request) {
         if (ObjectUtils.isEmpty(request)) {
             return Result.fail(ErrorCode.PARAMS_ERROR, "请求参数不能为空");

@@ -32,7 +32,7 @@ public class CategoryAdminController {
      * 分类分页列表
      */
     @PostMapping("/list")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck
     public Result<PageResult<CategoryDTO>> listCategoryPage(@RequestBody(required = false) CategoryPageListRequest request) {
         if (request == null) {
             request = new CategoryPageListRequest();
@@ -44,7 +44,7 @@ public class CategoryAdminController {
      * 查询全部分类
      */
     @GetMapping("/all")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck
     public Result<List<CategoryDTO>> listAllCategories() {
         return Result.success(categoryService.listAllCategories());
     }
@@ -53,7 +53,7 @@ public class CategoryAdminController {
      * 根据ID查询分类
      */
     @GetMapping("/{id}")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck
     public Result<CategoryDTO> getCategoryById(@PathVariable Long id) {
         if (id == null || id <= 0) {
             return Result.fail(ErrorCode.PARAMS_ERROR, "分类ID非法");
@@ -65,7 +65,7 @@ public class CategoryAdminController {
      * 新增分类
      */
     @PostMapping("/add")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck
     public Result<Long> addCategory(@RequestBody CategoryAddRequest request) {
         if (ObjectUtils.isEmpty(request)) {
             return Result.fail(ErrorCode.PARAMS_ERROR, "请求参数不能为空");
@@ -77,7 +77,7 @@ public class CategoryAdminController {
      * 修改分类
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck
     public Result<Boolean> updateCategory(@RequestBody CategoryUpdateRequest request) {
         if (ObjectUtils.isEmpty(request)) {
             return Result.fail(ErrorCode.PARAMS_ERROR, "请求参数不能为空");
@@ -89,7 +89,7 @@ public class CategoryAdminController {
      * 删除分类
      */
     @PostMapping("/delete")
-    @AuthCheck(mustRole = "admin")
+    @AuthCheck
     public Result<Boolean> deleteCategory(@RequestBody DeleteRequest deleteRequest) {
         if (ObjectUtils.isEmpty(deleteRequest)) {
             return Result.fail(ErrorCode.PARAMS_ERROR, "请求参数不能为空");
