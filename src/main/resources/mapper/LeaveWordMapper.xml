@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.grey.myblog.dao.LeaveWordDAO">
+
+    <resultMap id="BaseResultMap" type="com.grey.myblog.model.dataobject.LeaveWordDO">
+        <id property="id" column="id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="email" column="email"/>
+        <result property="content" column="content"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, nickname, email, content, create_time
+    </sql>
+
+    <!-- 插入留言 -->
+    <insert id="insert" parameterType="com.grey.myblog.model.dataobject.LeaveWordDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO leave_word (
+            nickname, email, content, create_time
+        ) VALUES (
+            #{nickname}, #{email}, #{content}, #{createTime}
+        )
+    </insert>
+
+    <!-- 根据ID删除留言 -->
+    <delete id="deleteById">
+        DELETE FROM leave_word WHERE id = #{id}
+    </delete>
+
+    <!-- 根据ID查询留言 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM leave_word
+        WHERE id = #{id}
+    </select>
+
+    <!-- 查询全部留言列表 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM leave_word
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 统计留言数 -->
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM leave_word
+    </select>
+
+</mapper>

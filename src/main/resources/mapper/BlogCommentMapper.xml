@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.grey.myblog.dao.BlogCommentDAO">
+
+    <resultMap id="BaseResultMap" type="com.grey.myblog.model.dataobject.BlogCommentDO">
+        <id property="id" column="id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="email" column="email"/>
+        <result property="content" column="content"/>
+        <result property="articleId" column="article_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="replyNickname" column="reply_nickname"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, nickname, email, content, article_id, parent_id, reply_nickname, create_time
+    </sql>
+
+    <!-- 插入评论 -->
+    <insert id="insert" parameterType="com.grey.myblog.model.dataobject.BlogCommentDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO blog_comment (
+            nickname, email, content, article_id, parent_id, reply_nickname, create_time
+        ) VALUES (
+            #{nickname}, #{email}, #{content}, #{articleId}, #{parentId}, #{replyNickname}, #{createTime}
+        )
+    </insert>
+
+    <!-- 根据ID删除评论 -->
+    <delete id="deleteById">
+        DELETE FROM blog_comment WHERE id = #{id}
+    </delete>
+
+    <!-- 根据ID查询评论 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM blog_comment
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据文章ID查询评论列表 -->
+    <select id="selectByArticleId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM blog_comment
+        WHERE article_id = #{articleId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 查询全部评论列表 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM blog_comment
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据父评论ID查询子评论列表 -->
+    <select id="selectByParentId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM blog_comment
+        WHERE parent_id = #{parentId}
+        ORDER BY create_time ASC
+    </select>
+
+    <!-- 统计文章评论数 -->
+    <select id="countByArticleId" resultType="int">
+        SELECT COUNT(*) FROM blog_comment WHERE article_id = #{articleId}
+    </select>
+
+</mapper>
