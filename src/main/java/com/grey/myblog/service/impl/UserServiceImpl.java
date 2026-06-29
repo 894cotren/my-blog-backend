@@ -146,8 +146,8 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名或密码错误");
         }
 
-        // 生成 token: admin-UUID (去掉横线)
-        String token = "admin-" + UUID.randomUUID().toString().replace("-", "");
+        // 生成 token: UUID (去掉横线)
+        String token = UUID.randomUUID().toString().replace("-", "");
 
         // 用户数据脱敏
         UserDTO loginUserVo = getLoginUserVo(loginUser);
