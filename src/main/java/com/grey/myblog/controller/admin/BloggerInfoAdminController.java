@@ -3,9 +3,9 @@ package com.grey.myblog.controller.admin;
 import com.grey.myblog.annotation.AuthCheck;
 import com.grey.myblog.common.Result;
 import com.grey.myblog.model.enums.ErrorCode;
-import com.grey.myblog.model.request.WebsiteInfoUpdateRequest;
-import com.grey.myblog.model.dto.WebsiteInfoDTO;
-import com.grey.myblog.service.WebsiteInfoService;
+import com.grey.myblog.model.request.BloggerInfoUpdateRequest;
+import com.grey.myblog.model.dto.BloggerInfoDTO;
+import com.grey.myblog.service.BloggerInfoService;
 import jakarta.annotation.Resource;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,35 +15,35 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 网站信息管理接口
+ * 博主信息管理接口
  *
  * @author grey
  */
 @RestController
-@RequestMapping("/admin/website-info")
-public class WebsiteInfoAdminController {
+@RequestMapping("/admin/blogger-info")
+public class BloggerInfoAdminController {
 
     @Resource
-    private WebsiteInfoService websiteInfoService;
+    private BloggerInfoService bloggerInfoService;
 
     /**
-     * 获取网站信息
+     * 获取博主信息
      */
     @GetMapping("/get")
     @AuthCheck
-    public Result<WebsiteInfoDTO> getWebsiteInfo() {
-        return Result.success(websiteInfoService.getWebsiteInfo());
+    public Result<BloggerInfoDTO> getBloggerInfo() {
+        return Result.success(bloggerInfoService.getBloggerInfo());
     }
 
     /**
-     * 更新网站信息
+     * 更新博主信息
      */
     @PostMapping("/update")
     @AuthCheck
-    public Result<Boolean> updateWebsiteInfo(@RequestBody WebsiteInfoUpdateRequest request) {
+    public Result<Boolean> updateBloggerInfo(@RequestBody BloggerInfoUpdateRequest request) {
         if (ObjectUtils.isEmpty(request)) {
             return Result.fail(ErrorCode.PARAMS_ERROR, "请求参数不能为空");
         }
-        return Result.success(websiteInfoService.updateWebsiteInfo(request));
+        return Result.success(bloggerInfoService.updateBloggerInfo(request));
     }
 }

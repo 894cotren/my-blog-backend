@@ -56,14 +56,14 @@ public class UploadController {
     }
 
     /**
-     * 上传网站头像
+     * 上传博主头像
      *
      * @param file 头像文件
      * @return 图片访问 URL
      */
-    @PostMapping("/website/avatar")
-    public Result<String> uploadWebsiteAvatar(@RequestParam("file") MultipartFile file) {
-        String url = minioUtils.upload(UploadEnum.WEBSITE_AVATAR, file);
+    @PostMapping("/blogger/avatar")
+    public Result<String> uploadBloggerAvatar(@RequestParam("file") MultipartFile file) {
+        String url = minioUtils.upload(UploadEnum.BLOGGER_AVATAR, file);
         return Result.success(url);
     }
 

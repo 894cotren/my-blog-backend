@@ -30,9 +30,9 @@ public enum UploadEnum {
     USER_AVATAR("user/avatar/", "用户头像", List.of(".jpg", ".jpeg", ".png", ".gif", ".webp"), 0.3),
 
     /**
-     * 网站信息头像
+     * 博主头像
      */
-    WEBSITE_AVATAR("website/avatar/", "网站头像", List.of(".jpg", ".jpeg", ".png", ".gif", ".webp"), 0.3);
+    BLOGGER_AVATAR("blogger/avatar/", "博主头像", List.of(".jpg", ".jpeg", ".png", ".gif", ".webp"), 0.3);
 
     /**
      * 上传目录

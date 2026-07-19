@@ -76,8 +76,8 @@ CREATE TABLE IF NOT EXISTS `article_tag` (
     KEY `idx_tag_id` (`tag_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文章-标签关联表';
 
--- 网站信息表
-CREATE TABLE IF NOT EXISTS `website_info` (
+-- 博主信息表
+CREATE TABLE IF NOT EXISTS `blogger_info` (
     `id`             bigint         NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `blogger_name`   varchar(100)   NOT NULL                COMMENT '博主名称',
     `avatar`         varchar(1024)  DEFAULT NULL            COMMENT '博主头像',
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `website_info` (
     `update_time`    datetime       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `is_deleted`     tinyint        NOT NULL DEFAULT 0      COMMENT '逻辑删除标记（0-未删除，1-已删除）',
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='网站信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='博主信息表';
 
 
 
@@ -116,3 +116,17 @@ CREATE TABLE IF NOT EXISTS `leave_word` (
     `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='留言表';
+
+-- 网站资讯统计表（单行表，约定只存一条记录）
+CREATE TABLE IF NOT EXISTS `site_stats` (
+    `id`                        bigint   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `article_count`            int      NOT NULL DEFAULT 0       COMMENT '文章数目（定时任务刷新）',
+    `total_words`              bigint   NOT NULL DEFAULT 0       COMMENT '全站字数（定时任务刷新）',
+    `visit_count`              bigint   NOT NULL DEFAULT 0       COMMENT '全站访问次数PV（拦截器实时+1）',
+    `site_create_date`         date     DEFAULT NULL             COMMENT '建站日期（用于计算运行时长）',
+    `last_article_update_time` datetime DEFAULT NULL             COMMENT '最近文章更新时间（定时任务刷新）',
+    `stats_refresh_time`       datetime DEFAULT NULL             COMMENT '统计最近刷新时间（定时任务写入）',
+    `create_time`              datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`              datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='网站资讯统计表';

@@ -1,17 +1,29 @@
-package com.grey.myblog.model.request;
+package com.grey.myblog.model.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
- * 网站信息更新请求
+ * 博主信息 DTO
  *
  * @author grey
  */
 @Data
-public class WebsiteInfoUpdateRequest implements Serializable {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class BloggerInfoDTO implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 主键ID
+     */
+    private Long id;
 
     /**
      * 博主名称
@@ -42,4 +54,9 @@ public class WebsiteInfoUpdateRequest implements Serializable {
      * 关于我内容
      */
     private String aboutContent;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
 }

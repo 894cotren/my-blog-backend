@@ -1,13 +1,13 @@
 package com.grey.myblog.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.grey.myblog.dao.WebsiteInfoDAO;
+import com.grey.myblog.dao.BloggerInfoDAO;
 import com.grey.myblog.exception.BusinessException;
-import com.grey.myblog.model.dataobject.WebsiteInfoDO;
+import com.grey.myblog.model.dataobject.BloggerInfoDO;
 import com.grey.myblog.model.enums.ErrorCode;
-import com.grey.myblog.model.request.WebsiteInfoUpdateRequest;
-import com.grey.myblog.model.dto.WebsiteInfoDTO;
-import com.grey.myblog.service.WebsiteInfoService;
+import com.grey.myblog.model.request.BloggerInfoUpdateRequest;
+import com.grey.myblog.model.dto.BloggerInfoDTO;
+import com.grey.myblog.service.BloggerInfoService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -16,33 +16,33 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 
 /**
- * 网站信息服务实现类
+ * 博主信息服务实现类
  *
  * @author grey
  */
 @Service
-public class WebsiteInfoServiceImpl implements WebsiteInfoService {
+public class BloggerInfoServiceImpl implements BloggerInfoService {
 
     private static final int MAX_BLOGGER_NAME_LENGTH = 100;
     private static final int MAX_INTRO_LENGTH = 500;
 
     @Resource
-    private WebsiteInfoDAO websiteInfoDAO;
+    private BloggerInfoDAO bloggerInfoDAO;
 
     @Override
-    public WebsiteInfoDTO getWebsiteInfo() {
-        WebsiteInfoDO websiteInfo = getOrCreateWebsiteInfo();
-        return convertToWebsiteInfoDTO(websiteInfo);
+    public BloggerInfoDTO getBloggerInfo() {
+        BloggerInfoDO bloggerInfo = getOrCreateBloggerInfo();
+        return convertToBloggerInfoDTO(bloggerInfo);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean updateWebsiteInfo(WebsiteInfoUpdateRequest request) {
-        validateWebsiteInfoUpdateRequest(request);
-        WebsiteInfoDO existingWebsiteInfo = getOrCreateWebsiteInfo();
+    public Boolean updateBloggerInfo(BloggerInfoUpdateRequest request) {
+        validateBloggerInfoUpdateRequest(request);
+        BloggerInfoDO existingBloggerInfo = getOrCreateBloggerInfo();
 
-        WebsiteInfoDO websiteInfo = WebsiteInfoDO.builder()
-                .id(existingWebsiteInfo.getId())
+        BloggerInfoDO bloggerInfo = BloggerInfoDO.builder()
+                .id(existingBloggerInfo.getId())
                 .bloggerName(normalizeBloggerName(request.getBloggerName()))
                 .avatar(normalizeOptionalField(request.getAvatar()))
                 .intro(normalizeIntro(request.getIntro()))
@@ -52,39 +52,39 @@ public class WebsiteInfoServiceImpl implements WebsiteInfoService {
                 .updateTime(new Date())
                 .build();
 
-        int result = websiteInfoDAO.updateById(websiteInfo);
+        int result = bloggerInfoDAO.updateById(bloggerInfo);
         if (result <= 0) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新网站信息失败");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新博主信息失败");
         }
         return true;
     }
 
     /**
-     * 获取或初始化网站信息
+     * 获取或初始化博主信息
      */
-    private WebsiteInfoDO getOrCreateWebsiteInfo() {
-        WebsiteInfoDO websiteInfo = websiteInfoDAO.selectFirst();
-        if (websiteInfo != null) {
-            return websiteInfo;
+    private BloggerInfoDO getOrCreateBloggerInfo() {
+        BloggerInfoDO bloggerInfo = bloggerInfoDAO.selectFirst();
+        if (bloggerInfo != null) {
+            return bloggerInfo;
         }
 
-        WebsiteInfoDO defaultWebsiteInfo = WebsiteInfoDO.builder()
+        BloggerInfoDO defaultBloggerInfo = BloggerInfoDO.builder()
                 .bloggerName("Grey")
                 .updateTime(new Date())
                 .isDeleted(0)
                 .build();
 
-        int result = websiteInfoDAO.insert(defaultWebsiteInfo);
+        int result = bloggerInfoDAO.insert(defaultBloggerInfo);
         if (result <= 0) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "初始化网站信息失败");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "初始化博主信息失败");
         }
-        return defaultWebsiteInfo;
+        return defaultBloggerInfo;
     }
 
     /**
-     * 校验网站信息更新请求
+     * 校验博主信息更新请求
      */
-    private void validateWebsiteInfoUpdateRequest(WebsiteInfoUpdateRequest request) {
+    private void validateBloggerInfoUpdateRequest(BloggerInfoUpdateRequest request) {
         if (request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数不能为空");
         }
@@ -104,11 +104,11 @@ public class WebsiteInfoServiceImpl implements WebsiteInfoService {
     }
 
     /**
-     * 转换为网站信息响应对象
+     * 转换为博主信息响应对象
      */
-    private WebsiteInfoDTO convertToWebsiteInfoDTO(WebsiteInfoDO websiteInfo) {
-        WebsiteInfoDTO response = new WebsiteInfoDTO();
-        BeanUtils.copyProperties(websiteInfo, response);
+    private BloggerInfoDTO convertToBloggerInfoDTO(BloggerInfoDO bloggerInfo) {
+        BloggerInfoDTO response = new BloggerInfoDTO();
+        BeanUtils.copyProperties(bloggerInfo, response);
         return response;
     }
 

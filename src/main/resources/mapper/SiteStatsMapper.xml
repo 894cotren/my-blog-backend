@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.grey.myblog.dao.SiteStatsDAO">
+
+    <resultMap id="BaseResultMap" type="com.grey.myblog.model.dataobject.SiteStatsDO">
+        <id property="id" column="id"/>
+        <result property="articleCount" column="article_count"/>
+        <result property="totalWords" column="total_words"/>
+        <result property="visitCount" column="visit_count"/>
+        <result property="siteCreateDate" column="site_create_date"/>
+        <result property="lastArticleUpdateTime" column="last_article_update_time"/>
+        <result property="statsRefreshTime" column="stats_refresh_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, article_count, total_words, visit_count, site_create_date,
+        last_article_update_time, stats_refresh_time, create_time, update_time
+    </sql>
+
+    <!-- 插入网站资讯 -->
+    <insert id="insert" parameterType="com.grey.myblog.model.dataobject.SiteStatsDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO site_stats (
+            article_count, total_words, visit_count, site_create_date,
+            last_article_update_time, stats_refresh_time, create_time, update_time
+        ) VALUES (
+            #{articleCount}, #{totalWords}, #{visitCount}, #{siteCreateDate},
+            #{lastArticleUpdateTime}, #{statsRefreshTime}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <!-- 根据ID更新网站资讯（动态更新非空字段） -->
+    <update id="updateById" parameterType="com.grey.myblog.model.dataobject.SiteStatsDO">
+        UPDATE site_stats
+        <set>
+            <if test="articleCount != null">article_count = #{articleCount},</if>
+            <if test="totalWords != null">total_words = #{totalWords},</if>
+            <if test="visitCount != null">visit_count = #{visitCount},</if>
+            <if test="siteCreateDate != null">site_create_date = #{siteCreateDate},</if>
+            <if test="lastArticleUpdateTime != null">last_article_update_time = #{lastArticleUpdateTime},</if>
+            <if test="statsRefreshTime != null">stats_refresh_time = #{statsRefreshTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 查询第一条网站资讯（单行表） -->
+    <select id="selectFirst" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM site_stats
+        LIMIT 1
+    </select>
+
+    <!-- 刷新统计字段（文章数、全站字数、最近文章更新时间、刷新时间） -->
+    <update id="refreshStats">
+        UPDATE site_stats
+        SET article_count = (SELECT COUNT(*) FROM article WHERE is_deleted = 0),
+            total_words = (SELECT IFNULL(SUM(word_count), 0) FROM article WHERE is_deleted = 0),
+            last_article_update_time = (SELECT MAX(update_time) FROM article WHERE is_deleted = 0),
+            stats_refresh_time = NOW()
+    </update>
+
+    <!-- 访问次数 +1 -->
+    <update id="incrementVisitCount">
+        UPDATE site_stats SET visit_count = visit_count + 1
+    </update>
+
+</mapper>

@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 网站信息表
+ * 博主信息表
  *
  * @author grey
  */
@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WebsiteInfoDO implements Serializable {
+public class BloggerInfoDO implements Serializable {
 
     /**
      * 主键ID
