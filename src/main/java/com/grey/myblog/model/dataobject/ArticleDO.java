@@ -43,7 +43,7 @@ public class ArticleDO implements Serializable {
     /**
      * 排序权重（0为默认，1000为置顶）
      */
-    private Integer sortOrder;
+    private Integer sortWeight;
 
     /**
      * 阅读量

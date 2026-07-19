@@ -32,5 +32,5 @@ public class CategoryDTO implements Serializable {
     /**
      * 排序权重
      */
-    private Integer sortOrder;
+    private Integer sortWeight;
 }

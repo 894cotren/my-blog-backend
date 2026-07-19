@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private static final int MAX_CATEGORY_NAME_LENGTH = 50;
-    private static final int DEFAULT_SORT_ORDER = 0;
+    private static final int DEFAULT_SORT_WEIGHT = 0;
 
     @Resource
     private CategoryDAO categoryDAO;
@@ -85,7 +85,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         CategoryDO category = CategoryDO.builder()
                 .name(categoryName)
-                .sortOrder(normalizeSortOrder(request.getSortOrder()))
+                .sortWeight(normalizeSortWeight(request.getSortWeight()))
                 .createTime(new Date())
                 .updateTime(new Date())
                 .build();
@@ -107,7 +107,7 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryDO category = CategoryDO.builder()
                 .id(existingCategory.getId())
                 .name(categoryName)
-                .sortOrder(normalizeSortOrder(request.getSortOrder()))
+                .sortWeight(normalizeSortWeight(request.getSortWeight()))
                 .updateTime(new Date())
                 .build();
 
@@ -225,7 +225,7 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * 标准化排序权重
      */
-    private Integer normalizeSortOrder(Integer sortOrder) {
-        return sortOrder == null ? DEFAULT_SORT_ORDER : sortOrder;
+    private Integer normalizeSortWeight(Integer sortWeight) {
+        return sortWeight == null ? DEFAULT_SORT_WEIGHT : sortWeight;
     }
 }

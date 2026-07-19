@@ -57,5 +57,5 @@ public class ArticleUpdateRequest implements Serializable {
     /**
      * 排序权重
      */
-    private Integer sortOrder;
+    private Integer sortWeight;
 }

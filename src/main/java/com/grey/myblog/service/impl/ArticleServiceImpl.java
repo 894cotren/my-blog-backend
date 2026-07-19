@@ -160,7 +160,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .coverImage(request.getCoverImage())
                 .categoryId(request.getCategoryId())
                 .status(request.getStatus())
-                .sortOrder(request.getSortOrder())
+                .sortWeight(request.getSortWeight())
                 .authorId(loginUser.getId())
                 .viewCount(0)
                 .createTime(new Date())
@@ -207,7 +207,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .coverImage(request.getCoverImage())
                 .categoryId(request.getCategoryId())
                 .status(request.getStatus())
-                .sortOrder(request.getSortOrder())
+                .sortWeight(request.getSortWeight())
                 .updateTime(new Date())
                 .build();
 

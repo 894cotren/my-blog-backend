@@ -52,5 +52,5 @@ public class ArticleAddRequest implements Serializable {
     /**
      * 排序权重（默认0）
      */
-    private Integer sortOrder = 0;
+    private Integer sortWeight = 0;
 }
