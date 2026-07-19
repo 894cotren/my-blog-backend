@@ -156,6 +156,7 @@ public class ArticleServiceImpl implements ArticleService {
         ArticleDO article = ArticleDO.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
+                .wordCount(calculateWordCount(request.getContent()))
                 .excerpt(request.getExcerpt())
                 .coverImage(request.getCoverImage())
                 .categoryId(request.getCategoryId())
@@ -199,10 +200,13 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限修改此文章");
         }
 
+        Integer wordCount = request.getContent() != null ? calculateWordCount(request.getContent()) : null;
+
         ArticleDO article = ArticleDO.builder()
                 .id(request.getId())
                 .title(request.getTitle())
                 .content(request.getContent())
+                .wordCount(wordCount)
                 .excerpt(request.getExcerpt())
                 .coverImage(request.getCoverImage())
                 .categoryId(request.getCategoryId())
@@ -263,10 +267,6 @@ public class ArticleServiceImpl implements ArticleService {
 
         ArticleDTO articleVO = new ArticleDTO();
         BeanUtils.copyProperties(article, articleVO);
-
-        if (article.getContent() != null) {
-            articleVO.setWordCount(calculateWordCount(article.getContent()));
-        }
 
         return articleVO;
     }

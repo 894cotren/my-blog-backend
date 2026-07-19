@@ -46,6 +46,11 @@ public class ArticleDO implements Serializable {
     private Integer sortWeight;
 
     /**
+     * 字数统计
+     */
+    private Integer wordCount;
+
+    /**
      * 阅读量
      */
     private Integer viewCount;

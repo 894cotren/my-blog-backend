@@ -11,6 +11,7 @@
         <result property="excerpt" column="excerpt"/>
         <result property="coverImage" column="cover_image"/>
         <result property="sortWeight" column="sort_weight"/>
+        <result property="wordCount" column="word_count"/>
         <result property="viewCount" column="view_count"/>
         <result property="categoryId" column="category_id"/>
         <result property="authorId" column="author_id"/>
@@ -21,17 +22,17 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, title, content, excerpt, cover_image, sort_weight,
+        id, title, content, excerpt, cover_image, sort_weight, word_count,
         view_count, category_id, author_id, status, create_time, update_time, is_deleted
     </sql>
 
     <!-- 插入文章 -->
     <insert id="insert" parameterType="com.grey.myblog.model.dataobject.ArticleDO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article (
-            title, content, excerpt, cover_image, sort_weight,
+            title, content, excerpt, cover_image, sort_weight, word_count,
             view_count, category_id, author_id, status, create_time, update_time, is_deleted
         ) VALUES (
-            #{title}, #{content}, #{excerpt}, #{coverImage}, #{sortWeight},
+            #{title}, #{content}, #{excerpt}, #{coverImage}, #{sortWeight}, #{wordCount},
             #{viewCount}, #{categoryId}, #{authorId}, #{status}, #{createTime}, #{updateTime}, 0
         )
     </insert>
@@ -39,12 +40,12 @@
     <!-- 批量插入文章 -->
     <insert id="insertBatch" parameterType="java.util.List">
         INSERT INTO article (
-            title, content, excerpt, cover_image, sort_weight,
+            title, content, excerpt, cover_image, sort_weight, word_count,
             view_count, category_id, author_id, status, create_time, update_time, is_deleted
         ) VALUES
         <foreach collection="list" item="item" separator=",">
             (
-                #{item.title}, #{item.content}, #{item.excerpt}, #{item.coverImage}, #{item.sortWeight},
+                #{item.title}, #{item.content}, #{item.excerpt}, #{item.coverImage}, #{item.sortWeight}, #{item.wordCount},
                 #{item.viewCount}, #{item.categoryId}, #{item.authorId}, #{item.status}, #{item.createTime}, #{item.updateTime}, 0
             )
         </foreach>
@@ -59,6 +60,7 @@
             <if test="excerpt != null">excerpt = #{excerpt},</if>
             <if test="coverImage != null">cover_image = #{coverImage},</if>
             <if test="sortWeight != null">sort_weight = #{sortWeight},</if>
+            <if test="wordCount != null">word_count = #{wordCount},</if>
             <if test="viewCount != null">view_count = #{viewCount},</if>
             <if test="categoryId != null">category_id = #{categoryId},</if>
             <if test="authorId != null">author_id = #{authorId},</if>
@@ -126,6 +128,7 @@
             excerpt,
             cover_image,
             sort_weight,
+            word_count,
             view_count,
             category_id,
             author_id,
