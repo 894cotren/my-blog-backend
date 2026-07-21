@@ -130,3 +130,23 @@ CREATE TABLE IF NOT EXISTS `site_stats` (
     `update_time`              datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='网站资讯统计表';
+
+-- 网站配置表（单行表，约定只存一条记录）
+CREATE TABLE IF NOT EXISTS `website_config` (
+    `id`                      bigint         NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `website_name`            varchar(100)   NOT NULL                COMMENT '网站标题',
+    `logo`                    varchar(1024)  DEFAULT NULL            COMMENT '网站 Logo 图片URL',
+    `favicon`                 varchar(1024)  DEFAULT NULL            COMMENT '站点图标（浏览器页签）URL',
+    `blogger_card_background` varchar(1024)  DEFAULT NULL            COMMENT '博主卡片背景图URL',
+    `banner_images`           varchar(2000)  DEFAULT NULL            COMMENT '首页 banner 轮播图列表（URL 以换行分隔）',
+    `article_cover_images`    varchar(2000)  DEFAULT NULL            COMMENT '文章默认封面图列表（文章未传封面时随机取一张兜底，URL 以换行分隔）',
+    `typing_texts`            varchar(1000)  DEFAULT NULL            COMMENT '首页打字机滚动文案列表（多条以换行分隔，预留）',
+    `header_notification`     varchar(500)   DEFAULT NULL            COMMENT '首页公告条（文章列表上方）',
+    `sidebar_announcement`    varchar(500)   DEFAULT NULL            COMMENT '侧边栏公告',
+    `daily_soup`              varchar(1000)  DEFAULT NULL            COMMENT '侧边栏每日鸡汤',
+    `record_info`             varchar(100)   DEFAULT NULL            COMMENT 'ICP备案号',
+    `extend_info`             varchar(2000)  DEFAULT NULL            COMMENT '扩展信息（预留，按需使用）',
+    `create_time`             datetime       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`             datetime       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='网站配置表';

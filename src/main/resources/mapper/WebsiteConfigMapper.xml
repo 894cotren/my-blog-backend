@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.grey.myblog.dao.WebsiteConfigDAO">
+
+    <resultMap id="BaseResultMap" type="com.grey.myblog.model.dataobject.WebsiteConfigDO">
+        <id property="id" column="id"/>
+        <result property="websiteName" column="website_name"/>
+        <result property="logo" column="logo"/>
+        <result property="favicon" column="favicon"/>
+        <result property="bloggerCardBackground" column="blogger_card_background"/>
+        <result property="bannerImages" column="banner_images"/>
+        <result property="articleCoverImages" column="article_cover_images"/>
+        <result property="typingTexts" column="typing_texts"/>
+        <result property="headerNotification" column="header_notification"/>
+        <result property="sidebarAnnouncement" column="sidebar_announcement"/>
+        <result property="dailySoup" column="daily_soup"/>
+        <result property="recordInfo" column="record_info"/>
+        <result property="extendInfo" column="extend_info"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, website_name, logo, favicon, blogger_card_background, banner_images,
+        article_cover_images, typing_texts, header_notification, sidebar_announcement,
+        daily_soup, record_info, extend_info, create_time, update_time
+    </sql>
+
+    <!-- 插入网站配置 -->
+    <insert id="insert" parameterType="com.grey.myblog.model.dataobject.WebsiteConfigDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO website_config (
+            website_name, logo, favicon, blogger_card_background, banner_images,
+            article_cover_images, typing_texts, header_notification, sidebar_announcement,
+            daily_soup, record_info, extend_info, create_time, update_time
+        ) VALUES (
+            #{websiteName}, #{logo}, #{favicon}, #{bloggerCardBackground}, #{bannerImages},
+            #{articleCoverImages}, #{typingTexts}, #{headerNotification}, #{sidebarAnnouncement},
+            #{dailySoup}, #{recordInfo}, #{extendInfo}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <!-- 根据ID更新网站配置（动态更新非空字段） -->
+    <update id="updateById" parameterType="com.grey.myblog.model.dataobject.WebsiteConfigDO">
+        UPDATE website_config
+        <set>
+            <if test="websiteName != null">website_name = #{websiteName},</if>
+            <if test="logo != null">logo = #{logo},</if>
+            <if test="favicon != null">favicon = #{favicon},</if>
+            <if test="bloggerCardBackground != null">blogger_card_background = #{bloggerCardBackground},</if>
+            <if test="bannerImages != null">banner_images = #{bannerImages},</if>
+            <if test="articleCoverImages != null">article_cover_images = #{articleCoverImages},</if>
+            <if test="typingTexts != null">typing_texts = #{typingTexts},</if>
+            <if test="headerNotification != null">header_notification = #{headerNotification},</if>
+            <if test="sidebarAnnouncement != null">sidebar_announcement = #{sidebarAnnouncement},</if>
+            <if test="dailySoup != null">daily_soup = #{dailySoup},</if>
+            <if test="recordInfo != null">record_info = #{recordInfo},</if>
+            <if test="extendInfo != null">extend_info = #{extendInfo},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除网站配置 -->
+    <delete id="deleteById">
+        DELETE FROM website_config WHERE id = #{id}
+    </delete>
+
+    <!-- 查询第一条网站配置（单行表） -->
+    <select id="selectFirst" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM website_config
+        LIMIT 1
+    </select>
+
+</mapper>

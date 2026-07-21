@@ -2,6 +2,10 @@
 application-dev.yml
 application-prod.yml
 
+# 项目本地记忆目录（自建，不入库）
+/memory/
+CLAUDE.md
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
