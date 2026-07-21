@@ -33,6 +33,8 @@ public class ArticleBlogController {
         if (request == null) {
             request = new ArticlePageListRequest();
         }
+        // 博客端只展示公开文章，强制 status=1，忽略客户端传入
+        request.setStatus(1);
         PageResult<ArticleDTO> articlePage = articleService.listArticles(request);
         return Result.success(articlePage);
     }
@@ -47,7 +49,8 @@ public class ArticleBlogController {
         if (id == null || id <= 0) {
             return Result.fail(ErrorCode.PARAMS_ERROR, "文章ID无效");
         }
-        ArticleDTO articleVO = articleService.getArticleById(id);
+        // 博客端只看公开文章（status=1），草稿/私密视为不存在
+        ArticleDTO articleVO = articleService.getArticleById(id, 1);
         return Result.success(articleVO);
     }
 

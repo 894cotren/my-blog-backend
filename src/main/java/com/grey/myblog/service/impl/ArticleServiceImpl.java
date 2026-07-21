@@ -90,11 +90,16 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleDTO getArticleById(Long id) {
+    public ArticleDTO getArticleById(Long id, Integer requireStatus) {
         AssertUtil.isFalse(id == null || id <= 0, ErrorCode.PARAMS_ERROR, "文章ID无效");
 
         ArticleDO article = articleDAO.selectById(id);
         if (article == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "文章不存在");
+        }
+
+        // 状态可见性控制：requireStatus 非 null 时，状态不匹配视为不存在（不泄露草稿/私密的存在性）
+        if (requireStatus != null && !requireStatus.equals(article.getStatus())) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "文章不存在");
         }
 

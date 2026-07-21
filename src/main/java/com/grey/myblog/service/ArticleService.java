@@ -25,8 +25,12 @@ public interface ArticleService {
 
     /**
      * 获取文章详情
+     *
+     * @param id            文章ID
+     * @param requireStatus 要求的文章状态；为 null 时不限制状态（管理端用），
+     *                     非 null 时文章状态不匹配则视为不存在（博客端传 1 只看公开）
      */
-    ArticleDTO getArticleById(Long id);
+    ArticleDTO getArticleById(Long id, Integer requireStatus);
 
     /**
      * 获取文章归档列表

@@ -42,11 +42,14 @@ public class ArticleAdminController {
      * 文章列表（主页）（无正文，只有摘要）
      */
     @PostMapping("/list")
+    @AuthCheck
     public Result<PageResult<ArticleDTO>> listArticles(@RequestBody ArticlePageListRequest request) {
         // 请求参数为空时使用默认值，避免空指针异常
         if (request == null) {
             request = new ArticlePageListRequest();
         }
+        // 管理端可查看所有状态的文章，强制 status=null（不限状态）
+        request.setStatus(null);
         PageResult<ArticleDTO> articlePage = articleService.listArticles(request);
         return Result.success(articlePage);
     }
@@ -57,11 +60,13 @@ public class ArticleAdminController {
      * 访问时自动增加阅读量
      */
     @GetMapping("/{id}")
+    @AuthCheck
     public Result<ArticleDTO> getArticleById(@PathVariable Long id) {
         if (id == null || id <= 0) {
             return Result.fail(ErrorCode.PARAMS_ERROR, "文章ID无效");
         }
-        ArticleDTO articleVO = articleService.getArticleById(id);
+        // 管理端可查看所有状态的文章（requireStatus=null 不限制）
+        ArticleDTO articleVO = articleService.getArticleById(id, null);
         return Result.success(articleVO);
     }
 
