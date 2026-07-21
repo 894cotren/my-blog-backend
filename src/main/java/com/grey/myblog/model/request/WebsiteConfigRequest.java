@@ -72,6 +72,16 @@ public class WebsiteConfigRequest implements Serializable {
     private String recordInfo;
 
     /**
+     * 关于本站的说明内容
+     */
+    private String aboutSite;
+
+    /**
+     * 技术栈列表
+     */
+    private List<String> techStack;
+
+    /**
      * 扩展信息（预留，按需使用）
      */
     private String extendInfo;

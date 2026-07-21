@@ -17,6 +17,8 @@
         <result property="sidebarAnnouncement" column="sidebar_announcement"/>
         <result property="dailySoup" column="daily_soup"/>
         <result property="recordInfo" column="record_info"/>
+        <result property="aboutSite" column="about_site"/>
+        <result property="techStack" column="tech_stack"/>
         <result property="extendInfo" column="extend_info"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
@@ -25,7 +27,7 @@
     <sql id="Base_Column_List">
         id, website_name, logo, favicon, blogger_card_background, banner_images,
         article_cover_images, typing_texts, header_notification, sidebar_announcement,
-        daily_soup, record_info, extend_info, create_time, update_time
+        daily_soup, record_info, about_site, tech_stack, extend_info, create_time, update_time
     </sql>
 
     <!-- 插入网站配置 -->
@@ -33,11 +35,11 @@
         INSERT INTO website_config (
             website_name, logo, favicon, blogger_card_background, banner_images,
             article_cover_images, typing_texts, header_notification, sidebar_announcement,
-            daily_soup, record_info, extend_info, create_time, update_time
+            daily_soup, record_info, about_site, tech_stack, extend_info, create_time, update_time
         ) VALUES (
             #{websiteName}, #{logo}, #{favicon}, #{bloggerCardBackground}, #{bannerImages},
             #{articleCoverImages}, #{typingTexts}, #{headerNotification}, #{sidebarAnnouncement},
-            #{dailySoup}, #{recordInfo}, #{extendInfo}, #{createTime}, #{updateTime}
+            #{dailySoup}, #{recordInfo}, #{aboutSite}, #{techStack}, #{extendInfo}, #{createTime}, #{updateTime}
         )
     </insert>
 
@@ -56,6 +58,8 @@
             <if test="sidebarAnnouncement != null">sidebar_announcement = #{sidebarAnnouncement},</if>
             <if test="dailySoup != null">daily_soup = #{dailySoup},</if>
             <if test="recordInfo != null">record_info = #{recordInfo},</if>
+            <if test="aboutSite != null">about_site = #{aboutSite},</if>
+            <if test="techStack != null">tech_stack = #{techStack},</if>
             <if test="extendInfo != null">extend_info = #{extendInfo},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </set>

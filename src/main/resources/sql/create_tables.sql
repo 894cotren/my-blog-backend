@@ -145,6 +145,8 @@ CREATE TABLE IF NOT EXISTS `website_config` (
     `sidebar_announcement`    varchar(500)   DEFAULT NULL            COMMENT '侧边栏公告',
     `daily_soup`              varchar(1000)  DEFAULT NULL            COMMENT '侧边栏每日鸡汤',
     `record_info`             varchar(100)   DEFAULT NULL            COMMENT 'ICP备案号',
+    `about_site`              text           DEFAULT NULL            COMMENT '关于本站的说明内容',
+    `tech_stack`              varchar(1000)  DEFAULT NULL            COMMENT '技术栈列表（多个以换行分隔）',
     `extend_info`             varchar(2000)  DEFAULT NULL            COMMENT '扩展信息（预留，按需使用）',
     `create_time`             datetime       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`             datetime       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

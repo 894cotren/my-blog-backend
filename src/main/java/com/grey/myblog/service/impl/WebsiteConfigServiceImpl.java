@@ -141,6 +141,8 @@ public class WebsiteConfigServiceImpl implements WebsiteConfigService {
                 .sidebarAnnouncement(normalizeOptional(request.getSidebarAnnouncement()))
                 .dailySoup(normalizeOptional(request.getDailySoup()))
                 .recordInfo(normalizeOptional(request.getRecordInfo()))
+                .aboutSite(normalizeOptional(request.getAboutSite()))
+                .techStack(joinToRaw(request.getTechStack()))
                 .extendInfo(normalizeOptional(request.getExtendInfo()))
                 .updateTime(new Date())
                 .build();
@@ -156,6 +158,7 @@ public class WebsiteConfigServiceImpl implements WebsiteConfigService {
         dto.setBannerImages(splitToList(config.getBannerImages()));
         dto.setArticleCoverImages(splitToList(config.getArticleCoverImages()));
         dto.setTypingTexts(splitToList(config.getTypingTexts()));
+        dto.setTechStack(splitToList(config.getTechStack()));
         return dto;
     }
 
