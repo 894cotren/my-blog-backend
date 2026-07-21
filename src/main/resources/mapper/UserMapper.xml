@@ -139,19 +139,51 @@
             <if test="request.role != null and request.role != ''">AND role = #{request.role}</if>
             <if test="request.profile != null and request.profile != ''">AND profile LIKE CONCAT('%', #{request.profile}, '%')</if>
         </where>
-        <if test="request.sortField != null and request.sortField != ''">
-            <choose>
-                <when test="request.sortOrder == 'descend' or request.sortOrder == 'desc'">
-                    ORDER BY ${request.sortField} DESC
-                </when>
-                <otherwise>
-                    ORDER BY ${request.sortField} ASC
-                </otherwise>
-            </choose>
-        </if>
-        <if test="request.sortField == null or request.sortField == ''">
-            ORDER BY create_time DESC
-        </if>
+        <choose>
+            <when test="request.sortField != null and request.sortField != ''">
+                <choose>
+                    <when test="request.sortField == 'create_time' or request.sortField == 'createTime'">
+                        ORDER BY create_time
+                        <choose>
+                            <when test="request.sortOrder == 'descend' or request.sortOrder == 'desc'">
+                                DESC
+                            </when>
+                            <otherwise>
+                                ASC
+                            </otherwise>
+                        </choose>
+                    </when>
+                    <when test="request.sortField == 'update_time' or request.sortField == 'updateTime'">
+                        ORDER BY update_time
+                        <choose>
+                            <when test="request.sortOrder == 'descend' or request.sortOrder == 'desc'">
+                                DESC
+                            </when>
+                            <otherwise>
+                                ASC
+                            </otherwise>
+                        </choose>
+                    </when>
+                    <when test="request.sortField == 'id'">
+                        ORDER BY id
+                        <choose>
+                            <when test="request.sortOrder == 'descend' or request.sortOrder == 'desc'">
+                                DESC
+                            </when>
+                            <otherwise>
+                                ASC
+                            </otherwise>
+                        </choose>
+                    </when>
+                    <otherwise>
+                        ORDER BY create_time DESC
+                    </otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                ORDER BY create_time DESC
+            </otherwise>
+        </choose>
     </select>
 
     <!-- 根据账号和密码查询用户（登录） -->

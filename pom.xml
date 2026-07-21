@@ -61,12 +61,6 @@
             <artifactId>hutool-all</artifactId>
             <version>5.8.16</version>
         </dependency>
-        <!--knife4j 自动生成文档、以及可以网页调试的依赖-->
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
-            <version>4.4.0</version>
-        </dependency>
         <!--mybatis-->
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>

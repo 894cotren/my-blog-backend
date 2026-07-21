@@ -1,5 +1,6 @@
 package com.grey.myblog.controller.admin;
 
+import com.grey.myblog.annotation.AuthCheck;
 import com.grey.myblog.common.Result;
 import com.grey.myblog.enums.UploadEnum;
 import com.grey.myblog.utils.MinioUtils;
@@ -26,6 +27,7 @@ public class UploadController {
      * @return 图片访问 URL
      */
     @PostMapping("/article/cover")
+    @AuthCheck
     public Result<String> uploadArticleCover(@RequestParam("file") MultipartFile file) {
         String url = minioUtils.upload(UploadEnum.ARTICLE_COVER, file);
         return Result.success(url);
@@ -38,6 +40,7 @@ public class UploadController {
      * @return 图片访问 URL
      */
     @PostMapping("/article/image")
+    @AuthCheck
     public Result<String> uploadArticleImage(@RequestParam("file") MultipartFile file) {
         String url = minioUtils.upload(UploadEnum.ARTICLE_IMAGE, file);
         return Result.success(url);
@@ -50,6 +53,7 @@ public class UploadController {
      * @return 图片访问 URL
      */
     @PostMapping("/user/avatar")
+    @AuthCheck
     public Result<String> uploadUserAvatar(@RequestParam("file") MultipartFile file) {
         String url = minioUtils.upload(UploadEnum.USER_AVATAR, file);
         return Result.success(url);
@@ -62,6 +66,7 @@ public class UploadController {
      * @return 图片访问 URL
      */
     @PostMapping("/blogger/avatar")
+    @AuthCheck
     public Result<String> uploadBloggerAvatar(@RequestParam("file") MultipartFile file) {
         String url = minioUtils.upload(UploadEnum.BLOGGER_AVATAR, file);
         return Result.success(url);
@@ -74,6 +79,7 @@ public class UploadController {
      * @return 是否删除成功
      */
     @DeleteMapping("/delete")
+    @AuthCheck
     public Result<Boolean> deleteFile(@RequestParam("fileUrl") String fileUrl) {
         boolean success = minioUtils.deleteFile(fileUrl);
         return Result.success(success);
