@@ -26,6 +26,7 @@ import com.grey.myblog.service.ArticleTagService;
 import com.grey.myblog.service.CategoryService;
 import com.grey.myblog.service.TagService;
 import com.grey.myblog.service.UserService;
+import com.grey.myblog.service.WebsiteConfigService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 /**
@@ -59,6 +61,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private WebsiteConfigService websiteConfigService;
 
     @Override
     public PageResult<ArticleDTO> listArticles(ArticlePageListRequest request) {
@@ -163,7 +168,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .content(request.getContent())
                 .wordCount(calculateWordCount(request.getContent()))
                 .excerpt(request.getExcerpt())
-                .coverImage(request.getCoverImage())
+                .coverImage(resolveCoverImage(request.getCoverImage(), null))
                 .categoryId(request.getCategoryId())
                 .status(request.getStatus())
                 .sortWeight(request.getSortWeight())
@@ -207,13 +212,16 @@ public class ArticleServiceImpl implements ArticleService {
 
         Integer wordCount = request.getContent() != null ? calculateWordCount(request.getContent()) : null;
 
+        // 封面：请求传了用请求的；没传则沿用已有封面；已有也为空时从网站配置封面池随机兜底
+        String coverImage = resolveCoverImage(request.getCoverImage(), existingArticle.getCoverImage());
+
         ArticleDO article = ArticleDO.builder()
                 .id(request.getId())
                 .title(request.getTitle())
                 .content(request.getContent())
                 .wordCount(wordCount)
                 .excerpt(request.getExcerpt())
-                .coverImage(request.getCoverImage())
+                .coverImage(coverImage)
                 .categoryId(request.getCategoryId())
                 .status(request.getStatus())
                 .sortWeight(request.getSortWeight())
@@ -414,6 +422,38 @@ public class ArticleServiceImpl implements ArticleService {
             return 0;
         }
         return content.length();
+    }
+
+    /**
+     * 解析文章封面
+     * - 请求传了封面：直接用
+     * - 请求没传：沿用已有封面（新增文章 existingCover 传 null）；已有也为空时从网站配置封面池随机兜底
+     */
+    private String resolveCoverImage(String requestCover, String existingCover) {
+        if (StrUtil.isNotBlank(requestCover)) {
+            return requestCover;
+        }
+        if (StrUtil.isNotBlank(existingCover)) {
+            return existingCover;
+        }
+        return pickRandomCover();
+    }
+
+    /**
+     * 从网站配置封面池随机取一张兜底封面（按池大小取随机下标）
+     * 池为空或网站配置未初始化时返回 null，不影响文章写入
+     */
+    private String pickRandomCover() {
+        try {
+            List<String> covers = websiteConfigService.getWebsiteConfig().getArticleCoverImages();
+            if (covers == null || covers.isEmpty()) {
+                return null;
+            }
+            return covers.get(ThreadLocalRandom.current().nextInt(covers.size()));
+        } catch (Exception e) {
+            log.warn("文章封面随机兜底失败（网站配置可能未初始化），文章将不带封面：{}", e.getMessage());
+            return null;
+        }
     }
 
     /**

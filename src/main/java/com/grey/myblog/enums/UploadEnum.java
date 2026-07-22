@@ -32,7 +32,12 @@ public enum UploadEnum {
     /**
      * 博主头像
      */
-    BLOGGER_AVATAR("blogger/avatar/", "博主头像", List.of(".jpg", ".jpeg", ".png", ".gif", ".webp"), 0.3);
+    BLOGGER_AVATAR("blogger/avatar/", "博主头像", List.of(".jpg", ".jpeg", ".png", ".gif", ".webp"), 0.3),
+
+    /**
+     * 网站配置图片（logo/favicon/banner 等）
+     */
+    WEBSITE_CONFIG("website-config/", "网站配置图片", List.of(".jpg", ".jpeg", ".png", ".gif", ".webp"), 3.0);
 
     /**
      * 上传目录

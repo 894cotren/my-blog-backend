@@ -73,6 +73,19 @@ public class UploadController {
     }
 
     /**
+     * 上传网站配置图片（logo/favicon/banner/文章默认封面图等）
+     *
+     * @param file 图片文件
+     * @return 图片访问 URL
+     */
+    @PostMapping("/website-config/image")
+    @AuthCheck
+    public Result<String> uploadWebsiteConfigImage(@RequestParam("file") MultipartFile file) {
+        String url = minioUtils.upload(UploadEnum.WEBSITE_CONFIG, file);
+        return Result.success(url);
+    }
+
+    /**
      * 删除文件
      *
      * @param fileUrl 文件 URL
