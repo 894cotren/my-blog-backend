@@ -28,10 +28,14 @@ import com.grey.myblog.service.TagService;
 import com.grey.myblog.service.UserService;
 import com.grey.myblog.service.WebsiteConfigService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -108,8 +112,10 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "文章不存在");
         }
 
-        // 增加阅读量
-        incrementViewCount(id);
+        // 增加阅读量（排除登录用户，避免管理端预览污染统计）
+        if (!userService.isLoggedIn(currentRequest())) {
+            incrementViewCount(id);
+        }
 
         // 转换为DTO并填充关联数据
         ArticleDTO articleDTO = convertToArticleDTO(article);
@@ -268,6 +274,19 @@ public class ArticleServiceImpl implements ArticleService {
             return false;
         }
         return articleDAO.incrementViewCount(id) > 0;
+    }
+
+    /**
+     * 获取当前 HTTP 请求（从请求上下文）
+     * 参考 AuthInterceptor 的取法；非 HTTP 上下文时返回 null
+     */
+    private HttpServletRequest currentRequest() {
+        try {
+            RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
+            return ((ServletRequestAttributes) requestAttributes).getRequest();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**

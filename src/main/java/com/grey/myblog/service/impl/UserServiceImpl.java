@@ -202,6 +202,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean isLoggedIn(HttpServletRequest request) {
+        if (request == null) {
+            return false;
+        }
+        try {
+            String token = request.getHeader(UserConstant.TOKEN_HEADER_KEY);
+            if (StrUtil.isBlank(token)) {
+                return false;
+            }
+            // token 在 Redis 中存在即视为登录态（登录写入、登出删除、过期自动消失），不必每次查库
+            String userIdStr = stringRedisTemplate.opsForValue().get(UserConstant.TOKEN_KEY_PREFIX + token);
+            return StrUtil.isNotBlank(userIdStr);
+        } catch (Exception e) {
+            log.warn("判断登录状态异常", e);
+            return false;
+        }
+    }
+
+    @Override
     public boolean userLogout(HttpServletRequest request) {
         // 从请求头获取 token
         String token = request.getHeader(UserConstant.TOKEN_HEADER_KEY);

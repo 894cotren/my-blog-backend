@@ -44,6 +44,12 @@ public interface UserService {
     UserDO getLoginUser(HttpServletRequest request);
 
     /**
+     * 判断当前请求是否已登录（不抛异常）
+     * 未登录 / 登录过期 / 异常均返回 false，用于非鉴权场景下判断登录态
+     */
+    boolean isLoggedIn(HttpServletRequest request);
+
+    /**
      * 用户退出登录
      */
     boolean userLogout(HttpServletRequest request);
