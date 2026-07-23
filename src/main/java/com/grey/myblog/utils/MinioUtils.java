@@ -32,6 +32,9 @@ public class MinioUtils {
     @Value("${minio.endpoint}")
     private String endpoint;
 
+    @Value("${minio.public-endpoint}")
+    private String publicEndpoint;
+
     @Value("${minio.bucketName}")
     private String bucketName;
 
@@ -62,7 +65,7 @@ public class MinioUtils {
             minioClient.putObject(args);
 
             // 返回访问 URL
-            return endpoint + "/" + bucketName + "/" + objectName;
+            return publicEndpoint + "/" + bucketName + "/" + objectName;
         } catch (Exception e) {
             log.error("文件上传失败: {}", e.getMessage(), e);
             throw new FileUploadException("文件上传失败: " + e.getMessage(), e);
@@ -93,7 +96,7 @@ public class MinioUtils {
 
             minioClient.putObject(args);
 
-            return endpoint + "/" + bucketName + "/" + objectName;
+            return publicEndpoint + "/" + bucketName + "/" + objectName;
         } catch (Exception e) {
             log.error("文件上传失败: {}", e.getMessage(), e);
             throw new FileUploadException("文件上传失败: " + e.getMessage(), e);
@@ -245,8 +248,8 @@ public class MinioUtils {
      * 从完整 URL 中提取对象名称
      */
     private String extractObjectName(String fileUrl) {
-        // URL 格式: {endpoint}/{bucketName}/{objectName}
-        String prefix = endpoint + "/" + bucketName + "/";
+        // URL 格式: {publicEndpoint}/{bucketName}/{objectName}
+        String prefix = publicEndpoint + "/" + bucketName + "/";
         if (fileUrl.startsWith(prefix)) {
             return fileUrl.substring(prefix.length());
         }
